@@ -26,8 +26,10 @@ include(pybind11.cmake)
 file (GLOB PYBIND_SRC
         # Stride MDP code
         "../../cpp/mdp/MDP.cpp"
+        "../../cpp/mdp/MDPRunner.cpp"
         # Pybind wrappers
         "mdp/MDP.cpp"
+        "mdp/AgeGroup.cpp"
         "libstride.cpp"
         )
 pybind11_add_module(pylibstride ${PYBIND_SRC})

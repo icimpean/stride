@@ -20,14 +20,14 @@
 
 #include "MDP.h"
 
-#include "calendar/Calendar.h"
 #include "contact/ContactType.h"
-#include "contact/InfectorExec.h"
-#include "disease/DiseaseSeeder.h"
+#include "mdp/AgeGroup.h"
+#include "mdp/MDPRunner.h"
+#include "pop/ConstantVaccine.h"
+#include "pop/Person.h"
 #include "pop/Population.h"
 #include "sim/Sim.h"
 #include "sim/SimBuilder.h"
-#include "sim/SimRunner.h"
 #include "util/FileSys.h"
 #include "util/RunConfigManager.h"
 #include "util/TimeStamp.h"
@@ -41,7 +41,7 @@ using namespace stride::util;
 using namespace EventLogMode;
 
 MDP::MDP()
-    : m_config(), m_simulator(nullptr), m_sim_runner(nullptr)
+    : m_config(), m_simulator(nullptr), m_runner(nullptr)
 {
 }
 
@@ -91,22 +91,72 @@ void MDP::Create_(const boost::property_tree::ptree& config) {
     // -----------------------------------------------------------------------------------------
     // Sim scenario: step , build a runner, register viewers.
     // -----------------------------------------------------------------------------------------
-    auto runner = make_shared<SimRunner>(m_config, m_simulator);
+    auto runner = make_shared<MDPRunner>(m_config, m_simulator);
     RegisterViewers(runner);
-    m_sim_runner = runner;
+    m_runner = runner;
 }
 
-void MDP::Simulate_Day()
+unsigned int MDP::GetNumberOfDays()
+{
+    const auto numDays = m_config.get<unsigned int>("run.num_days");
+    return numDays;
+}
+
+unsigned int MDP::Simulate(unsigned int numDays)
+{
+    // Run the simulation the given number of days
+    for (unsigned int i = 0; i < numDays; i++) {
+        m_runner->Step();
+    }
+    // Return the number of infected
+    return m_simulator->GetPopulation()->GetTotalInfected();
+}
+
+unsigned int MDP::Simulate_Day()
 {
     // Run the simulation for a day
-    m_sim_runner->Run(1);
+    return MDP::Simulate(1);
 }
 
 
-void MDP::Vaccinate(int availableVaccines, int ageGroup, int vaccineType) {
-    // TODO
-    // Temporary print to indicate function is called (but does nothing to the simulation yet)
-    cout << "[Vaccine]" << availableVaccines << " Vaccines of type" << vaccineType << " are distributed over age group " << ageGroup << endl;
+void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, int vaccineType) {
+    // Vaccinate the given age group
+    // TODO: use given vaccine type
+    VaccinateAgeGroup(availableVaccines, ageGroup);
+}
+
+void MDP::VaccinateAgeGroup(unsigned int availableVaccines, AgeGroup ageGroup) {
+
+    // Get people availableVaccines people within the given age group
+    std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+
+    // Simple loop for entire population
+    // TODO: create indices per age group to index, & remove vaccinated persons from indices?
+    //  => Don't iterate over all persons (or all age groups) & sample from those not yet vaccinated
+    // TODO: What happens when no people remain to be vaccinated in a certain group
+    //  => return the number of vaccines remaining and repurpose or are they lost?
+    unsigned int persons_found{0U};
+    for (Person& p : *pop) {
+        // If the person is in the right age group AND not yet vaccinated
+        if (GetAgeGroup(p.GetAge()) == ageGroup && !p.IsVaccinated()) {
+            // TODO: use the given vaccine type (currently based on ImmunitySeeder vaccination)
+            //Simple vaccine immunity
+            shared_ptr<ConstantVaccine::Properties> properties(new ConstantVaccine::Properties{"immunity", 1.0,1.0,1.0});
+            auto vaccine = std::unique_ptr<Vaccine>(new ConstantVaccine(properties));
+            p.SetVaccine(vaccine);
+            // Another person has been found to vaccinate
+            persons_found++;
+//            cout << "[Vaccine " << persons_found << "/" << availableVaccines << "] Person " << p.GetId() << " from age group " << ageGroup << " with age " << p.GetAge() << endl;
+            // If availableVaccines people have been vaccinated, stop iterating
+            if (persons_found == availableVaccines) { break; }
+        }
+    }
+    cout << "[Vaccine] " << persons_found << "/" << availableVaccines << " People vaccinated from age group " << ageGroup << endl;
+}
+
+void MDP::End()
+{
+    m_runner->End();
 }
 
 } // namespace stride

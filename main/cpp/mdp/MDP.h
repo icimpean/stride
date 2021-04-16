@@ -24,6 +24,7 @@
 #include "disease/PublicHealthAgency.h"
 #include "disease/TransmissionProfile.h"
 #include "disease/UniversalTesting.h"
+#include "mdp/AgeGroup.h"
 #include "util/RnMan.h"
 #include "util/RnHandler.h"
 #include "execs/ControlHelper.h"
@@ -36,7 +37,7 @@ namespace stride {
 class Calendar;
 class Population;
 class Sim;
-class SimRunner;
+class MDPRunner;
 
 /**
  * Markov Decision Process for the stride simulation.
@@ -53,28 +54,32 @@ public:
         /// Create an MDP (and the underlying simulation) from a given configuration
         /// TODO: default value for configuration for python call, or config file
         void Create(const std::string& configPath);
-        void Create_(const boost::property_tree::ptree& config);
+
+        /// Get the number of days specified to runt the simulation for
+        unsigned int GetNumberOfDays();
+
+        /// Simulate a given number of days in the simulation
+        unsigned int Simulate(unsigned int numDays);
 
         /// Simulate a single day in the simulation
         /// TODO: return state, reward, done (end simulation)
-        void Simulate_Day();
+        unsigned int Simulate_Day();
 
         /// Vaccinate a given age group with the given vaccine type and number of available vaccines
-        /// TODO: types ageGroup & VaccineType
-        void Vaccinate(int availableVaccines, int ageGroup, int vaccineType);
+        /// TODO: VaccineType
+        void Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, int vaccineType);
 
+        /// Notify the simulator should stop
+        void End();
 
-        /// Methods mapped from Sim class
-//        std::shared_ptr<Calendar> GetCalendar() const { return m_sim.GetCalendar(); }
-//        std::string GetConfigValue(const std::string& attribute) const { return m_config.get<std::string>(attribute); }
-//        std::shared_ptr<Population> GetPopulation() { return m_sim.GetPopulation(); }
-//        double GetTransmissionProbability() const { return m_sim.GetTransmissionProbability(); }
-//        const TransmissionProfile& RefTransmissionProfile() const { return m_sim.RefTransmissionProfile(); }
+private:
+        void Create_(const boost::property_tree::ptree& config);                      ///< Create an MDP (and the underlying simulation) from a given configuration
+        void VaccinateAgeGroup(unsigned int availableVaccines, AgeGroup ageGroup);    ///< Vaccinate a given age group with the available vaccines
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree
         std::shared_ptr<Sim> m_simulator;                           ///< The simulation
-        std::shared_ptr<SimRunner> m_sim_runner;                    ///< The runner for the simulation
+        std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
 };
 
 } // namespace stride

@@ -2,11 +2,7 @@
 #include "../../../cpp/mdp/MDP.h"
 
 // Some extra (external) header files of the project required for successfully building the pybind library
-#include "../../../cpp/calendar/Calendar.h"
-#include "../../../cpp/pop/Population.h"
-#include "../../../cpp/sim/Sim.h"
-#include "../../../cpp/sim/SimRunner.h"
-#include <boost/property_tree/ptree.hpp>
+//
 
 
 #include <pybind11/stl.h>
@@ -23,9 +19,15 @@ void init_mdp(py::module &m) {
             // Methods
             .def("Create", &stride::MDP::Create, py::arg("configPath"),
                  "Create a simulation from the given configuration file (.xml)")
+            .def("GetNumberOfDays", &stride::MDP::GetNumberOfDays,
+                 "Get the number of days specified to run the simulator for")
             .def("Simulate_Day", &stride::MDP::Simulate_Day,
                  "Runs the simulator for a day")
+            .def("Simulate", &stride::MDP::Simulate, py::arg("numDays"),
+                 "Runs the simulator for the given number of days")
             .def("Vaccinate", &stride::MDP::Vaccinate,
                  py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
-                 "Vaccinate a given age group with the given vaccine type for the available number of vaccines");
+                 "Vaccinate a given age group with the given vaccine type for the available number of vaccines")
+            .def("End", &stride::MDP::End,
+                 "Signal for the simulator (and loggers) to end the experiment");
 }

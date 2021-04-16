@@ -8,7 +8,7 @@
     <holidays_file>../../resources/data/holidays_none.csv</holidays_file>
     <immunity_profile>None</immunity_profile>
     <immunity_rate>0.8</immunity_rate>
-    <num_days>50</num_days>
+    <num_days>100</num_days>
     <num_participants_survey>10</num_participants_survey>
     <num_threads>1</num_threads>
     <output_cases>true</output_cases>

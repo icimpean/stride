@@ -3,11 +3,13 @@
 
 namespace py = pybind11;
 
+void init_age_group(py::module &);
 void init_mdp(py::module &);
 
 // Export the library pylibstride as a module
 PYBIND11_MODULE(pylibstride, m) {
     m.doc() = "STRIDE module";
 
+    init_age_group(m);
     init_mdp(m);
 }
