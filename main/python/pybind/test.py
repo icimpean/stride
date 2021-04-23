@@ -11,28 +11,33 @@ if __name__ == '__main__':
 
     # Create an instance of the MDP
     mdp = stride.MDP()
-    mdp.Create(default_file)
+    mdp.Create(default_file)  # TODO: use same seed in python and c++?
+
     # Get the number of days to run the experiment for (from the configuration file)
     numDays = mdp.GetNumberOfDays()
     # The step size in days between the next action the bandit can take
     step_size = 10
 
-    all_age_groups = list(stride.AgeGroup.__members__.values())
-    print(f"All age groups {all_age_groups}")
+    print(f"All age groups {stride.AllAgeGroups}")
 
-    def random_age_group():
-        return random.choice(all_age_groups)
+    def random_vaccinate():
+        group = random.choice(stride.AllAgeGroups)
+        v_type = random.choice(stride.AllVaccineTypes[1:])  # ignore noVaccine
+        return group, v_type
 
-    # Note: Internal Simulation stops after days given in config file have passed,
-    # even if Simulate_Day is called afterwards
+    # Run the simulation and vaccinate people
     for i in range(numDays // step_size):
-        # TODO: Bandit selects action to vaccinate instead of random choice
-        age_group = random_age_group()
-        print(f"Vaccinating {age_group.name}")
-        mdp.Vaccinate(availableVaccines=10000, ageGroup=age_group, vaccineType=0)
+        # Bandit should select action to vaccinate instead of random choice
+        age_group, vaccine_type = random_vaccinate()
+        print(f"Vaccinating {age_group.name} with {vaccine_type.name}")
 
-        # Run the simulation
-        infected = mdp.Simulate(step_size)
+        # Execute chosen vaccination for step_size days
+        for _ in range(step_size):
+            # Vaccinate
+            mdp.Vaccinate(availableVaccines=10000, ageGroup=age_group, vaccineType=vaccine_type)
+            # Run the simulation
+            infected = mdp.SimulateDay()
+
         print("Number infected:", infected)
 
     # Stop the mdp (simulator)

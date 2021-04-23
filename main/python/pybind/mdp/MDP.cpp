@@ -21,10 +21,15 @@ void init_mdp(py::module &m) {
                  "Create a simulation from the given configuration file (.xml)")
             .def("GetNumberOfDays", &stride::MDP::GetNumberOfDays,
                  "Get the number of days specified to run the simulator for")
-            .def("Simulate_Day", &stride::MDP::Simulate_Day,
+            .def("GetPopulationSize", &stride::MDP::GetPopulationSize,
+                 "Get the population size")
+            .def("SimulateDay", &stride::MDP::SimulateDay,
                  "Runs the simulator for a day")
             .def("Simulate", &stride::MDP::Simulate, py::arg("numDays"),
                  "Runs the simulator for the given number of days")
+            .def("SimulateVaccinate", &stride::MDP::SimulateVaccinate,
+                 py::arg("numDays"), py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
+                 "Runs the simulator for the given number of days and vaccinates people with the given vaccine type")
             .def("Vaccinate", &stride::MDP::Vaccinate,
                  py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
                  "Vaccinate a given age group with the given vaccine type for the available number of vaccines")

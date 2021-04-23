@@ -16,6 +16,8 @@ void init_age_group(py::module &m) {
             .value("young_adults", stride::AgeGroup::young_adults)
             .value("adults", stride::AgeGroup::adults)
             .value("elderly", stride::AgeGroup::elderly);
+    // All age groups
+    m.attr("AllAgeGroups") = stride::AllAgeGroups;
     // Get AgeGroup given an age
     m.def("GetAgeGroup", &stride::GetAgeGroup, py::arg("age"), "Get the age group for the given age");
 }

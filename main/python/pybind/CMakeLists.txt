@@ -30,6 +30,7 @@ file (GLOB PYBIND_SRC
         # Pybind wrappers
         "mdp/MDP.cpp"
         "mdp/AgeGroup.cpp"
+        "mdp/Vaccines.cpp"
         "libstride.cpp"
         )
 pybind11_add_module(pylibstride ${PYBIND_SRC})

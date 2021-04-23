@@ -25,12 +25,15 @@
 #include "disease/TransmissionProfile.h"
 #include "disease/UniversalTesting.h"
 #include "mdp/AgeGroup.h"
+#include "mdp/Vaccines.h"
 #include "util/RnMan.h"
 #include "util/RnHandler.h"
 #include "execs/ControlHelper.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <string>
+#include <map>
+#include <tuple>
 
 namespace stride {
 
@@ -41,9 +44,7 @@ class MDPRunner;
 
 /**
  * Markov Decision Process for the stride simulation.
- * Exposes the simulation to distribute vaccines to groups of the population.
- *
- * TODO: following SimRunner class of creating a simulation & population
+ * Exposes the simulation to distribute vaccines to age groups of the population.
  */
 class MDP : protected ControlHelper
 {
@@ -52,34 +53,51 @@ public:
         explicit MDP();
 
         /// Create an MDP (and the underlying simulation) from a given configuration
-        /// TODO: default value for configuration for python call, or config file
         void Create(const std::string& configPath);
 
-        /// Get the number of days specified to runt the simulation for
-        unsigned int GetNumberOfDays();
-
         /// Simulate a given number of days in the simulation
+        /// TODO: return state
         unsigned int Simulate(unsigned int numDays);
 
         /// Simulate a single day in the simulation
-        /// TODO: return state, reward, done (end simulation)
-        unsigned int Simulate_Day();
+        /// TODO: return state
+        unsigned int SimulateDay();
+
+        /// Simulate multiple days of vaccinations
+        /// TODO: return state
+        unsigned int SimulateVaccinate(unsigned int numDays, unsigned int availableVaccines,
+                                       AgeGroup ageGroup, VaccineType vaccineType);
 
         /// Vaccinate a given age group with the given vaccine type and number of available vaccines
-        /// TODO: VaccineType
-        void Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, int vaccineType);
+        void Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineType vaccineType);
 
         /// Notify the simulator should stop
         void End();
 
+        /// Get the number of days specified to runt the simulation for
+        unsigned int GetNumberOfDays();
+
+        /// Get the population size
+        unsigned int GetPopulationSize();
+
 private:
-        void Create_(const boost::property_tree::ptree& config);                      ///< Create an MDP (and the underlying simulation) from a given configuration
-        void VaccinateAgeGroup(unsigned int availableVaccines, AgeGroup ageGroup);    ///< Vaccinate a given age group with the available vaccines
+        /// Create an MDP (and the underlying simulation) from a given configuration
+        void Create_(const boost::property_tree::ptree& config);
+        /// Create a mapping of the age groups with the person IDs of people corresponding to those age groups.
+        void CreateAgeGroups();
+        /// Sample IDs for a given age group
+        std::vector<unsigned int> SampleAgeGroup(AgeGroup ageGroup, unsigned int samples);
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree
         std::shared_ptr<Sim> m_simulator;                           ///< The simulation
         std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
+        util::RnMan m_rnMan;                                        ///< The random number manager
+        unsigned int seed;                                          ///< The seed for the MDP | TODO: change in Create
+        std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups
 };
+
+/// (Helper function) Create a vaccine for a given vaccine type
+inline std::unique_ptr<Vaccine> GetVaccine(VaccineType vaccineType);
 
 } // namespace stride

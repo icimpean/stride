@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include <vector>
+
+
 namespace stride {
 
 /// Age groups enumeration
@@ -36,6 +39,9 @@ enum AgeGroup {
     /// Age 65+
     elderly
 };
+
+/// All the age groups
+static const std::vector<AgeGroup> AllAgeGroups = { children, youngsters, young_adults, adults, elderly };
 
 
 /// Get the age group for a given age

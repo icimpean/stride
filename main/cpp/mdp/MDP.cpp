@@ -21,7 +21,6 @@
 #include "MDP.h"
 
 #include "contact/ContactType.h"
-#include "mdp/AgeGroup.h"
 #include "mdp/MDPRunner.h"
 #include "pop/ConstantVaccine.h"
 #include "pop/Person.h"
@@ -41,7 +40,7 @@ using namespace stride::util;
 using namespace EventLogMode;
 
 MDP::MDP()
-    : m_config(), m_simulator(nullptr), m_runner(nullptr)
+    : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), seed(), m_age_groups()
 {
 }
 
@@ -76,7 +75,7 @@ void MDP::Create_(const boost::property_tree::ptree& config) {
     // -----------------------------------------------------------------------------------------
     const RnInfo info{m_config.get<string>("run.rng_seed", "1,2,3,4"), "",
                       m_config.get<unsigned int>("run.num_threads")};
-    RnMan        rnMan{info};
+    RnMan        rnMan{info};  // TODO: change seed each new Create call
 
     // -----------------------------------------------------------------------------------------
     // Sim scenario: step 2, create a population, as described by the parameter in the config.
@@ -94,12 +93,12 @@ void MDP::Create_(const boost::property_tree::ptree& config) {
     auto runner = make_shared<MDPRunner>(m_config, m_simulator);
     RegisterViewers(runner);
     m_runner = runner;
-}
 
-unsigned int MDP::GetNumberOfDays()
-{
-    const auto numDays = m_config.get<unsigned int>("run.num_days");
-    return numDays;
+    // -----------------------------------------------------------------------------------------
+    // Vaccines: Create the age groups for vaccine sampling later
+    // -----------------------------------------------------------------------------------------
+    m_rnMan = rnMan;
+    CreateAgeGroups();
 }
 
 unsigned int MDP::Simulate(unsigned int numDays)
@@ -112,51 +111,133 @@ unsigned int MDP::Simulate(unsigned int numDays)
     return m_simulator->GetPopulation()->GetTotalInfected();
 }
 
-unsigned int MDP::Simulate_Day()
+unsigned int MDP::SimulateDay()
 {
     // Run the simulation for a day
     return MDP::Simulate(1);
 }
 
-
-void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, int vaccineType) {
-    // Vaccinate the given age group
-    // TODO: use given vaccine type
-    VaccinateAgeGroup(availableVaccines, ageGroup);
+unsigned int MDP::SimulateVaccinate(unsigned int numDays, unsigned int availableVaccines,
+                                    AgeGroup ageGroup, VaccineType vaccineType)
+{
+    // Run the simulation the given number of days
+    for (unsigned int i = 0; i < numDays; i++) {
+        // Vaccinate
+        Vaccinate(availableVaccines, ageGroup, vaccineType);
+        // Simulate
+        m_runner->Step();
+    }
+    // Return the number of infected
+    return m_simulator->GetPopulation()->GetTotalInfected();
 }
 
-void MDP::VaccinateAgeGroup(unsigned int availableVaccines, AgeGroup ageGroup) {
-
+void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineType vaccineType)
+{
     // Get people availableVaccines people within the given age group
     std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+    // Sample from the given age group (none of these are vaccinated yet)
+    std::vector<unsigned int> sampled = SampleAgeGroup(ageGroup, availableVaccines);
 
-    // Simple loop for entire population
-    // TODO: create indices per age group to index, & remove vaccinated persons from indices?
-    //  => Don't iterate over all persons (or all age groups) & sample from those not yet vaccinated
-    // TODO: What happens when no people remain to be vaccinated in a certain group
-    //  => return the number of vaccines remaining and repurpose or are they lost?
-    unsigned int persons_found{0U};
-    for (Person& p : *pop) {
-        // If the person is in the right age group AND not yet vaccinated
-        if (GetAgeGroup(p.GetAge()) == ageGroup && !p.IsVaccinated()) {
-            // TODO: use the given vaccine type (currently based on ImmunitySeeder vaccination)
-            //Simple vaccine immunity
-            shared_ptr<ConstantVaccine::Properties> properties(new ConstantVaccine::Properties{"immunity", 1.0,1.0,1.0});
-            auto vaccine = std::unique_ptr<Vaccine>(new ConstantVaccine(properties));
-            p.SetVaccine(vaccine);
-            // Another person has been found to vaccinate
-            persons_found++;
-//            cout << "[Vaccine " << persons_found << "/" << availableVaccines << "] Person " << p.GetId() << " from age group " << ageGroup << " with age " << p.GetAge() << endl;
-            // If availableVaccines people have been vaccinated, stop iterating
-            if (persons_found == availableVaccines) { break; }
-        }
+    // Vaccinate the sampled people
+    for (unsigned int id : sampled) {
+        Person& p = pop->at(id);
+        auto vaccine = GetVaccine(vaccineType);
+        p.SetVaccine(vaccine);
     }
-    cout << "[Vaccine] " << persons_found << "/" << availableVaccines << " People vaccinated from age group " << ageGroup << endl;
+    // Log info
+    m_stride_logger->info("[Vaccinate] {}/{} people vaccinated from age group {} with vaccine {}",
+                          sampled.size(), availableVaccines, ageGroup, vaccineType);
 }
+
+// TODO: old draft of Vaccinate, to be removed
+//void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineType vaccineType)
+//{
+//    // Get people availableVaccines people within the given age group
+//    std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+//
+//    // Simple loop for entire population
+//    unsigned int persons_found{0U};
+//    for (Person& p : *pop) {
+//        // If the person is in the right age group AND not yet vaccinated
+//        if (GetAgeGroup(p.GetAge()) == ageGroup && !p.IsVaccinated()) {
+//            // Simple vaccine immunity // TODO: use the given vaccine type (currently based on ImmunitySeeder vaccination)
+//            shared_ptr<ConstantVaccine::Properties> properties(new ConstantVaccine::Properties{"immunity", 1.0,1.0,1.0});
+//            auto vaccine = std::unique_ptr<Vaccine>(new ConstantVaccine(properties));
+//            p.SetVaccine(vaccine);
+//            // Another person has been found to vaccinate
+//            persons_found++;
+// //            cout << "[Vaccine " << persons_found << "/" << availableVaccines << "] Person " << p.GetId() << " from age group " << ageGroup << " with age " << p.GetAge() << endl;
+//            // If availableVaccines people have been vaccinated, stop iterating
+//            if (persons_found == availableVaccines) { break; }
+//        }
+//    }
+//    cout << "[Vaccine] " << persons_found << "/" << availableVaccines << " People vaccinated from age group " << ageGroup << endl;
+//}
 
 void MDP::End()
 {
     m_runner->End();
+}
+
+unsigned int MDP::GetNumberOfDays()
+{
+    const auto numDays = m_config.get<unsigned int>("run.num_days");
+    return numDays;
+}
+
+unsigned int MDP::GetPopulationSize()
+{
+    return m_simulator->GetPopulation()->size();
+}
+
+void MDP::CreateAgeGroups()
+{
+    m_stride_logger->info("Creating age groups...");
+    // Create an empty mapping for each age group
+    for (AgeGroup ageGroup : AllAgeGroups) { m_age_groups[ageGroup] = std::vector<unsigned int>(); }
+    // Iterate over the population and add people to their age group
+    std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+    for (Person& p : *pop) { m_age_groups[GetAgeGroup(p.GetAge())].push_back(p.GetId()); }
+    // Remove unused capacity from the vectors and shuffle the values
+    for (AgeGroup ageGroup : AllAgeGroups) {
+        m_age_groups[ageGroup].shrink_to_fit();
+        m_rnMan.Shuffle(m_age_groups[ageGroup], 0U);
+    }
+}
+
+std::vector<unsigned int> MDP::SampleAgeGroup(AgeGroup ageGroup, unsigned int samples)
+{
+    // Get the age group to sample from
+    std::vector<unsigned int> group = m_age_groups[ageGroup];
+    std::vector<unsigned int> sampled;
+    // Take the last elements of the shuffled age group and remove them from the vector
+    while (!group.empty() && sampled.size() < samples) {
+        sampled.push_back(group.back());
+        group.pop_back();
+    }
+    return sampled;
+}
+
+// Helper function
+inline std::unique_ptr<Vaccine> GetVaccine(VaccineType vaccineType) {
+    // TODO: use LinearVaccine class instead?
+    shared_ptr<ConstantVaccine::Properties> properties;
+    // mRNA
+    if (vaccineType == mRNA) {
+        properties =
+        shared_ptr<ConstantVaccine::Properties>(
+                new ConstantVaccine::Properties{"mRNA vaccine", 0.95, 0.95, 1.00});
+    }
+    // Adeno
+    else if (vaccineType == adeno) {
+        properties =
+                shared_ptr<ConstantVaccine::Properties>(
+                new ConstantVaccine::Properties{"Adeno vaccine", 0.86, 0.86, 1.00});
+    }
+    // Else no vaccine (python does not supply noVaccine as an option so this should never happen)
+    else {}
+    // Create and return the vaccine
+    return std::unique_ptr<ConstantVaccine>(new ConstantVaccine(properties));
 }
 
 } // namespace stride
