@@ -23,6 +23,16 @@ void init_mdp(py::module &m) {
                  "Get the number of days specified to run the simulator for")
             .def("GetPopulationSize", &stride::MDP::GetPopulationSize,
                  "Get the population size")
+            .def("GetTotalInfected", &stride::MDP::GetTotalInfected,
+                 "Get the cumulative number of cases")
+            .def("CountInfectedCases", &stride::MDP::CountInfectedCases,
+                 "Get the current number of infected cases")
+            .def("CountExposedCases", &stride::MDP::CountExposedCases,
+                 "Get the current number of exposed cases")
+            .def("CountInfectiousCases", &stride::MDP::CountInfectiousCases,
+                 "Get the current number of infectious cases")
+            .def("CountSymptomaticCases", &stride::MDP::CountSymptomaticCases,
+                 "Get the current number of symptomatic cases")
             .def("SimulateDay", &stride::MDP::SimulateDay,
                  "Runs the simulator for a day")
             .def("Simulate", &stride::MDP::Simulate, py::arg("numDays"),

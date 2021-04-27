@@ -190,6 +190,31 @@ unsigned int MDP::GetPopulationSize()
     return m_simulator->GetPopulation()->size();
 }
 
+unsigned int MDP::GetTotalInfected() const
+{
+    return m_simulator->GetPopulation()->GetTotalInfected();
+}
+
+unsigned int MDP::CountInfectedCases() const
+{
+    return m_simulator->GetPopulation()->CountInfectedCases();
+}
+
+unsigned int MDP::CountExposedCases() const
+{
+    return m_simulator->GetPopulation()->CountExposedCases();
+}
+
+unsigned int MDP::CountInfectiousCases() const
+{
+    return m_simulator->GetPopulation()->CountInfectiousCases();
+}
+
+unsigned int MDP::CountSymptomaticCases() const
+{
+    return m_simulator->GetPopulation()->CountSymptomaticCases();
+}
+
 void MDP::CreateAgeGroups()
 {
     m_stride_logger->info("Creating age groups...");

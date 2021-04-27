@@ -80,6 +80,21 @@ public:
         /// Get the population size
         unsigned int GetPopulationSize();
 
+        /// Get the cumulative number of cases.
+        unsigned int GetTotalInfected() const;
+
+        /// Get the current number of infected cases.
+        unsigned int CountInfectedCases() const;
+
+        /// Get the current number of exposed cases.
+        unsigned int CountExposedCases() const;
+
+        /// Get the current number of infectious cases.
+        unsigned int CountInfectiousCases() const;
+
+        /// Get the current number of symptomatic cases.
+        unsigned int CountSymptomaticCases() const;
+
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration
         void Create_(const boost::property_tree::ptree& config);
