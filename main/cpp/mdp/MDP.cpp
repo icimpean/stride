@@ -232,7 +232,7 @@ inline std::unique_ptr<Vaccine> GetVaccine(VaccineType vaccineType) {
     else if (vaccineType == adeno) {
         properties =
                 shared_ptr<ConstantVaccine::Properties>(
-                new ConstantVaccine::Properties{"Adeno vaccine", 0.86, 0.86, 1.00});
+                new ConstantVaccine::Properties{"Adeno vaccine", 0.67, 0.67, 1.00});
     }
     // Else no vaccine (python does not supply noVaccine as an option so this should never happen)
     else {}
