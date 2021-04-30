@@ -53,7 +53,8 @@ public:
         explicit MDP();
 
         /// Create an MDP (and the underlying simulation) from a given configuration
-        void Create(const std::string& configPath);
+        void Create(const std::string& configPath, int seed = 0,
+                    const std::string& outputDir = "", const std::string& outputPrefix = "");
 
         /// Simulate a given number of days in the simulation
         /// TODO: return state
@@ -97,7 +98,8 @@ public:
 
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration
-        void Create_(const boost::property_tree::ptree& config);
+        void Create_(const boost::property_tree::ptree& config, int seed,
+                     const std::string& outputDir, const std::string& outputPrefix);
         /// Create a mapping of the age groups with the person IDs of people corresponding to those age groups.
         void CreateAgeGroups();
         /// Sample IDs for a given age group
@@ -108,7 +110,6 @@ private:
         std::shared_ptr<Sim> m_simulator;                           ///< The simulation
         std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
         util::RnMan m_rnMan;                                        ///< The random number manager
-        unsigned int seed;                                          ///< The seed for the MDP | TODO: change in Create
         std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups
 };
 

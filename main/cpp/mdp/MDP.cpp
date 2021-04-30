@@ -40,26 +40,36 @@ using namespace stride::util;
 using namespace EventLogMode;
 
 MDP::MDP()
-    : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), seed(), m_age_groups()
+    : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), m_age_groups()
 {
 }
 
-void MDP::Create(const std::string& configPath) {
+void MDP::Create(const std::string& configPath, int seed,
+                 const std::string& outputDir, const std::string& outputPrefix)
+{
     boost::property_tree::ptree configPt = FileSys::ReadPtreeFile(configPath);
-    MDP::Create_(configPt);
+    MDP::Create_(configPt, seed, outputDir, outputPrefix);
 }
 
-void MDP::Create_(const boost::property_tree::ptree& config) {
-    // Update the config (also the control helper since we didn't supply it at instantiation)
+void MDP::Create_(const boost::property_tree::ptree& config, int seed,
+                  const std::string& outputDir, const std::string& outputPrefix)
+{
+    // Update the config
     m_config = config;
-    ControlHelper::m_config = m_config;
+    // Update the output directory
+    if (!outputDir.empty()) {
+        m_config.put("run.output_prefix", outputDir);
+    }
     // From SimController.Control
     // add timestamp if no output prefix specified
-    if (m_config.get<string>("run.output_prefix", "").empty()) {
+    else if (m_config.get<string>("run.output_prefix", "").empty()) {
         m_config.put("run.output_prefix", TimeStamp().ToTag().append("/"));
     }
-    // sort the configuration details
+    // Sort the configuration details
     m_config.sort();
+    // Update the control helper since we didn't supply it at instantiation
+    ControlHelper::m_config = m_config;
+    ControlHelper::m_output_prefix = outputDir;
 
     // From SimController.Control
     // -----------------------------------------------------------------------------------------
@@ -70,12 +80,25 @@ void MDP::Create_(const boost::property_tree::ptree& config) {
     InstallLogger();
     LogStartup();
 
+    // Update the output directory to the prefix directory for current simulation
+    if (!outputPrefix.empty()) {
+        m_config.put("run.output_prefix", outputPrefix);
+        // Update the control helper since we didn't supply it at instantiation
+        ControlHelper::m_config = m_config;
+        ControlHelper::m_output_prefix = outputPrefix;
+    }
+
+    if (seed != NULL) {
+        m_stride_logger->info("Setting seed {}", seed);
+        m_config.put("run.rng_seed", seed);
+    }
+
     // -----------------------------------------------------------------------------------------
     // Sim scenario: step 1, build a random number manager.
     // -----------------------------------------------------------------------------------------
     const RnInfo info{m_config.get<string>("run.rng_seed", "1,2,3,4"), "",
                       m_config.get<unsigned int>("run.num_threads")};
-    RnMan        rnMan{info};  // TODO: change seed each new Create call
+    RnMan        rnMan{info};
 
     // -----------------------------------------------------------------------------------------
     // Sim scenario: step 2, create a population, as described by the parameter in the config.

@@ -17,8 +17,10 @@ void init_mdp(py::module &m) {
             // Constructor
             .def(py::init<>())
             // Methods
-            .def("Create", &stride::MDP::Create, py::arg("configPath"),
-                 "Create a simulation from the given configuration file (.xml)")
+            .def("Create", &stride::MDP::Create,
+                 py::arg("configPath"), py::arg("seed") = 0, py::arg("outputDir") = "", py::arg("outputPrefix") = "",
+                 "Create a simulation from the given configuration file (.xml) "
+                 "and optional output directory and prefix for the logs")
             .def("GetNumberOfDays", &stride::MDP::GetNumberOfDays,
                  "Get the number of days specified to run the simulator for")
             .def("GetPopulationSize", &stride::MDP::GetPopulationSize,
