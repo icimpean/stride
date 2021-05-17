@@ -26,7 +26,6 @@
 #include "pop/Person.h"
 #include "pop/Population.h"
 #include "sim/Sim.h"
-#include "sim/SimBuilder.h"
 #include "util/FileSys.h"
 #include "util/RunConfigManager.h"
 #include "util/TimeStamp.h"
@@ -38,10 +37,16 @@ namespace stride {
 using namespace std;
 using namespace stride::util;
 using namespace EventLogMode;
+using namespace stride::ContactType;
 
 MDP::MDP()
     : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), m_age_groups()
 {
+}
+
+MDP::~MDP() {
+    cout << "Deleting MDP attributes..." << endl;
+    ClearSimulation();
 }
 
 void MDP::Create(const std::string& configPath, int seed,
@@ -264,6 +269,24 @@ std::vector<unsigned int> MDP::SampleAgeGroup(AgeGroup ageGroup, unsigned int sa
         group.pop_back();
     }
     return sampled;
+}
+
+void MDP::ClearSimulation()
+{
+    // Clear the ContactPoolSys
+    cout << "\tClearing ContactPoolSys..." << endl;
+    m_simulator->GetPopulation()->RefPoolSys().ClearContactPools();
+
+    cout << "\tClearing population..." << endl;
+    m_simulator->GetPopulation()->clear();
+
+    cout << "\tClearing simulator and runner..." << endl;
+    m_runner.reset();
+    m_simulator.reset();
+
+    cout << "\tClearing age groups..." << endl;
+    m_age_groups.clear();
+
 }
 
 // Helper function

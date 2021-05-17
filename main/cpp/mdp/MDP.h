@@ -52,6 +52,8 @@ public:
         /// Constructor for empty MDP.
         explicit MDP();
 
+        ~MDP();
+
         /// Create an MDP (and the underlying simulation) from a given configuration
         void Create(const std::string& configPath, int seed = 0,
                     const std::string& outputDir = "", const std::string& outputPrefix = "");
@@ -104,6 +106,9 @@ private:
         void CreateAgeGroups();
         /// Sample IDs for a given age group
         std::vector<unsigned int> SampleAgeGroup(AgeGroup ageGroup, unsigned int samples);
+
+        /// Memory management
+        void ClearSimulation();
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree

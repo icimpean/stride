@@ -10,7 +10,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with the software. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Copyright 2017, 2018, Kuylen E, Willem L, Broeckhove J
+ *  Copyright 2021
  */
 
 /**
@@ -19,7 +19,6 @@
  */
 
 #include "MDPRunner.h"
-
 #include "pop/Population.h"
 #include "sim/Sim.h"
 
