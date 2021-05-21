@@ -98,6 +98,9 @@ public:
         /// Get the current number of symptomatic cases.
         unsigned int CountSymptomaticCases() const;
 
+        /// Memory management
+        void ClearSimulation();
+
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration
         void Create_(const boost::property_tree::ptree& config, int seed,
@@ -106,9 +109,6 @@ private:
         void CreateAgeGroups();
         /// Sample IDs for a given age group
         std::vector<unsigned int> SampleAgeGroup(AgeGroup ageGroup, unsigned int samples);
-
-        /// Memory management
-        void ClearSimulation();
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree
