@@ -37,7 +37,8 @@ Health::Health(unsigned short int start_infectiousness, unsigned short int start
         m_relative_infectiousness(0U),
 		m_relative_susceptibility(relative_susceptibility),
         m_start_hospitalisation(start_hospitalisation),
-        m_hospitalised(false)
+        m_hospitalised(false),
+        m_was_hospitalised(false)
 {
 }
 
@@ -107,6 +108,7 @@ void Health::Update()
             //compare it to the disease counter
             if (m_start_hospitalisation && GetDiseaseCounter() == m_start_hospitalisation) {
                 m_hospitalised = true;
+                m_was_hospitalised = true;
             }
         }
 }

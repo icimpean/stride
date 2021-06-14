@@ -98,8 +98,17 @@ public:
         /// Get the current number of symptomatic cases.
         unsigned int CountSymptomaticCases() const;
 
+        /// Get the current number of hospitalised cases.
+        unsigned int CountHospitalisedCases() const;
+
+        /// Get the cumulative number of hospitalisations.
+        unsigned int GetTotalHospitalised() const;
+
         /// Memory management
         void ClearSimulation();
+
+        /// TODO: get MDP state
+        // MDPState GetState();
 
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration

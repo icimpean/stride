@@ -243,6 +243,16 @@ unsigned int MDP::CountSymptomaticCases() const
     return m_simulator->GetPopulation()->CountSymptomaticCases();
 }
 
+unsigned int MDP::CountHospitalisedCases() const
+{
+    return m_simulator->GetPopulation()->CountHospitalisedCases();
+}
+
+unsigned int MDP::GetTotalHospitalised() const
+{
+    return m_simulator->GetPopulation()->GetTotalHospitalised();
+}
+
 void MDP::CreateAgeGroups()
 {
     m_stride_logger->info("Creating age groups...");

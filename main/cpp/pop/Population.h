@@ -73,6 +73,12 @@ public:
         /// Get the current number of symptomatic cases.
         unsigned int CountSymptomaticCases() const;
 
+        /// Get the current number of hospitalised cases.
+        unsigned int CountHospitalisedCases() const;
+
+        /// Get the cumulative number of hospitalisations.
+        unsigned int GetTotalHospitalised() const;
+
         /// Get the maximum age in the population.
         unsigned int GetMaxAge() const;
 

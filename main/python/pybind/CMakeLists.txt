@@ -23,17 +23,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(pybind11.cmake)
-file (GLOB PYBIND_SRC
-        # Stride MDP code
-        "../../cpp/mdp/MDP.cpp"
-        "../../cpp/mdp/MDPRunner.cpp"
-        # Pybind wrappers
-        "mdp/MDP.cpp"
-        "mdp/AgeGroup.cpp"
-        "mdp/Vaccines.cpp"
-        "libstride.cpp"
-        )
-pybind11_add_module(pylibstride ${PYBIND_SRC})
+# Stride MDP code
+set(PYLIBSTRIDE_SRC
+    "../../cpp/mdp/MDP.cpp"
+    "../../cpp/mdp/MDPRunner.cpp"
+    )
+
+# Pybind wrappers
+set(PYBIND_SRC
+    "mdp/MDP.cpp"
+    "mdp/AgeGroup.cpp"
+    "mdp/Vaccines.cpp"
+    "libstride.cpp"
+    )
+
+pybind11_add_module(pylibstride ${PYLIBSTRIDE_SRC} ${PYBIND_SRC})
 
 target_compile_definitions(pylibstride PUBLIC "-DSTRIDE_GIT_HASH=${STRIDE_WC_REVISION_HASH}")
 target_compile_definitions(pylibstride PUBLIC "-DPROCCOUNT=${PROCCOUNT}")

@@ -98,6 +98,12 @@ public:
 				return m_status == HealthStatus::Exposed;
 		}
 
+		/// Is this person hospitalised?
+		bool IsHospitalised() const { return m_hospitalised; }
+
+		/// Was the person hospitalised at a given point?
+		bool WasHospitalised() const { return m_was_hospitalised; }
+
         /// Have the symptoms started today?
         bool SymptomsStartedToday() const { return GetDiseaseCounter() == m_start_symptomatic; }
 
@@ -170,6 +176,7 @@ private:
 
         boost::optional<unsigned short int> m_start_hospitalisation; ///<Days after the individual needs to be hospitalised (optional, not all individuals end up in the hospital).
         bool               m_hospitalised;    ///< Is the individual currently hospitalised?
+        bool               m_was_hospitalised;  ///< Was the individual hospitalised at a given point?
 };
 
 } // namespace stride
