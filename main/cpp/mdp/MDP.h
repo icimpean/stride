@@ -55,19 +55,18 @@ public:
         ~MDP();
 
         /// Create an MDP (and the underlying simulation) from a given configuration
-        void Create(const std::string& configPath, int seed = 0,
-                    const std::string& outputDir = "", const std::string& outputPrefix = "");
+        void Create(const std::string& configPath,
+                    std::shared_ptr<VaccineProperties> mRNA_properties,
+                    std::shared_ptr<VaccineProperties> adeno_properties,
+                    int seed = 0, const std::string& outputDir = "", const std::string& outputPrefix = "");
 
         /// Simulate a given number of days in the simulation
-        /// TODO: return state
         unsigned int Simulate(unsigned int numDays);
 
         /// Simulate a single day in the simulation
-        /// TODO: return state
         unsigned int SimulateDay();
 
         /// Simulate multiple days of vaccinations
-        /// TODO: return state
         unsigned int SimulateVaccinate(unsigned int numDays, unsigned int availableVaccines,
                                        AgeGroup ageGroup, VaccineType vaccineType);
 
@@ -82,6 +81,9 @@ public:
 
         /// Get the population size
         unsigned int GetPopulationSize();
+
+        /// Get the size of the age groups
+        std::map<AgeGroup, unsigned int> GetAgeGroupSizes();
 
         /// Get the cumulative number of cases.
         unsigned int GetTotalInfected() const;
@@ -125,9 +127,8 @@ private:
         std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
         util::RnMan m_rnMan;                                        ///< The random number manager
         std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups
+        std::shared_ptr<VaccineProperties> m_mRNA_properties;       ///< The vaccine properties of the mRNA vaccine
+        std::shared_ptr<VaccineProperties> m_adeno_properties;      ///< The vaccine properties of the adeno vaccine
 };
-
-/// (Helper function) Create a vaccine for a given vaccine type
-inline std::unique_ptr<Vaccine> GetVaccine(VaccineType vaccineType);
 
 } // namespace stride

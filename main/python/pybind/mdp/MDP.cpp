@@ -18,7 +18,8 @@ void init_mdp(py::module &m) {
             .def(py::init<>())
             // Methods
             .def("Create", &stride::MDP::Create,
-                 py::arg("configPath"), py::arg("seed") = 0, py::arg("outputDir") = "", py::arg("outputPrefix") = "",
+                 py::arg("configPath"), py::arg("mRNA_properties"), py::arg("adeno_properties"),
+                 py::arg("seed") = 0, py::arg("outputDir") = "", py::arg("outputPrefix") = "",
                  "Create a simulation from the given configuration file (.xml) "
                  "and optional output directory and prefix for the logs")
             .def("ClearSimulation", &stride::MDP::ClearSimulation, "Clear the simulation data")
@@ -26,6 +27,8 @@ void init_mdp(py::module &m) {
                  "Get the number of days specified to run the simulator for")
             .def("GetPopulationSize", &stride::MDP::GetPopulationSize,
                  "Get the population size")
+            .def("GetAgeGroupSizes", &stride::MDP::GetAgeGroupSizes,
+                 "Get the sizes of the different age groups")
             .def("GetTotalInfected", &stride::MDP::GetTotalInfected,
                  "Get the cumulative number of cases")
             .def("CountInfectedCases", &stride::MDP::CountInfectedCases,

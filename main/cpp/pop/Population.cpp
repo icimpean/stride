@@ -159,12 +159,12 @@ unsigned int Population::CountHospitalisedCases() const
 
 unsigned int Population::GetTotalHospitalised() const
 {
-    unsigned int total{0U};
-    for (const auto& p : *this) {
-        const auto& h = p.GetHealth();
-        total += h.WasHospitalised();
-    }
-    return total;
+        unsigned int total{0U};
+        for (const auto& p : *this) {
+            const auto& h = p.GetHealth();
+            total += h.WasHospitalised();
+        }
+        return total;
 }
 
 unsigned int Population::GetMaxAge() const

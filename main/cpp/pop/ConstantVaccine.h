@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace stride {
 
 

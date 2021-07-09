@@ -20,6 +20,11 @@
 
 #pragma once
 
+#include "pop/Vaccine.h"
+#include "pop/ConstantVaccine.h"
+#include "pop/LinearVaccine.h"
+
+#include <string>
 #include <vector>
 
 
@@ -32,5 +37,56 @@ enum VaccineType { noVaccine, mRNA, adeno };
 
 /// All the vaccine types
 static const std::vector<VaccineType> AllVaccineTypes = { noVaccine, mRNA, adeno };
+
+
+/// Vaccine properties
+struct VaccineProperties {
+    virtual ~VaccineProperties() = default;
+
+    virtual std::unique_ptr<Vaccine> GetVaccine() = 0;
+};
+
+// Constant
+struct ConstantVaccineProperties : VaccineProperties {
+    ConstantVaccineProperties(std::string& v_id, double ve_susceptible, double ve_infectiousness, double ve_severe) :
+            id(v_id), ve_susceptible(ve_susceptible), ve_infectiousness(ve_infectiousness), ve_severe(ve_severe) { }
+
+    std::string id;
+    double ve_susceptible;
+    double ve_infectiousness;
+    double ve_severe;
+
+    virtual std::unique_ptr<Vaccine> GetVaccine() {
+        // std::printf("Creating Constant Vaccine\n");
+        std::shared_ptr<ConstantVaccine::Properties> properties;
+        properties = std::shared_ptr<ConstantVaccine::Properties>(
+                        new ConstantVaccine::Properties{id, ve_susceptible, ve_infectiousness, ve_severe});
+        // Create and return the vaccine
+        return std::unique_ptr<ConstantVaccine>(new ConstantVaccine(properties));
+    };
+};
+
+// Linear
+struct LinearVaccineProperties : VaccineProperties {
+    LinearVaccineProperties(std::string& v_id, double ve_susceptible, double ve_infectiousness, double ve_severe,
+                            unsigned short max_ve_day) :
+                            id(v_id), ve_susceptible(ve_susceptible), ve_infectiousness(ve_infectiousness),
+                            ve_severe(ve_severe), max_ve_day(max_ve_day) { }
+
+    std::string id;
+    double ve_susceptible;
+    double ve_infectiousness;
+    double ve_severe;
+    unsigned short max_ve_day;
+
+    virtual std::unique_ptr<Vaccine> GetVaccine() {
+        // std::printf("Creating Linear Vaccine\n");
+        std::shared_ptr<LinearVaccine::Properties> properties;
+        properties = std::shared_ptr<LinearVaccine::Properties>(
+                new LinearVaccine::Properties{id, ve_susceptible, ve_infectiousness, ve_severe, max_ve_day});
+        // Create and return the vaccine
+        return std::unique_ptr<LinearVaccine>(new LinearVaccine(properties));
+    };
+};
 
 } // namespace stride
