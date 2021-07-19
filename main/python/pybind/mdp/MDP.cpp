@@ -22,6 +22,9 @@ void init_mdp(py::module &m) {
                  py::arg("seed") = 0, py::arg("outputDir") = "", py::arg("outputPrefix") = "",
                  "Create a simulation from the given configuration file (.xml) "
                  "and optional output directory and prefix for the logs")
+            .def("UpdateCntReduction", &stride::MDP::UpdateCntReduction,
+                 py::arg("workplace_distancing"), py::arg("community_distancing"), py::arg("collectivity_distancing"),
+                 "Update the contact reduction of the simulation")
             .def("ClearSimulation", &stride::MDP::ClearSimulation, "Clear the simulation data")
             .def("GetNumberOfDays", &stride::MDP::GetNumberOfDays,
                  "Get the number of days specified to run the simulator for")

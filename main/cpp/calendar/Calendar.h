@@ -144,6 +144,10 @@ public:
 			return m_imported_cases[GetDayIndex(m_date)];
 		}
 
+		/// Update the contact reduction vectors
+		void UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
+                                std::vector<double> collectivity_distancing);
+
 private:
 
 		unsigned short int GetDayIndex(boost::gregorian::date date) const;

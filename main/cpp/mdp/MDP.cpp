@@ -132,6 +132,12 @@ void MDP::Create_(const boost::property_tree::ptree& config, int seed,
     CreateAgeGroups();
 }
 
+void MDP::UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
+                             std::vector<double> collectivity_distancing)
+{
+    m_simulator->GetCalendar()->UpdateCntReduction(workplace_distancing, community_distancing, collectivity_distancing);
+}
+
 unsigned int MDP::Simulate(unsigned int numDays)
 {
     // Run the simulation the given number of days

@@ -60,6 +60,10 @@ public:
                     std::shared_ptr<VaccineProperties> adeno_properties,
                     int seed = 0, const std::string& outputDir = "", const std::string& outputPrefix = "");
 
+        /// Update the contact reduction vectors
+        void UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
+                                std::vector<double> collectivity_distancing);
+
         /// Simulate a given number of days in the simulation
         unsigned int Simulate(unsigned int numDays);
 

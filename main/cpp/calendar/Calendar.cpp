@@ -322,5 +322,13 @@ void Calendar::Initialize_csv(const ptree& configPt)
 		calendarFile.close();
 }
 
+void Calendar::UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
+                                  std::vector<double> collectivity_distancing)
+{
+        m_workplace_distancing = workplace_distancing;
+        m_community_distancing = community_distancing;
+        m_collectivity_distancing = collectivity_distancing;
+}
+
 
 } // namespace stride
