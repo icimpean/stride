@@ -708,6 +708,12 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
   cnt_reduction_school <- ifelse('cnt_reduction_school' %in% names(config_exp),
                                  config_exp$cnt_reduction_school,
                                  0.0)
+  cnt_reduction_school_secondary <- ifelse('cnt_reduction_school_secondary' %in% names(config_exp),
+                                           config_exp$cnt_reduction_school_secondary,
+                                           cnt_reduction_school)
+  cnt_reduction_school_tertiary <- ifelse('cnt_reduction_school_tertiary' %in% names(config_exp),
+                                          config_exp$cnt_reduction_school_tertiary,
+                                          cnt_reduction_school)
 
   data.table(category = "schools_closed",
              date     = seq(as.Date(date_start),as.Date(date_end),1),
@@ -716,9 +722,20 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
              age = NA_integer_,
              stringsAsFactors = F
   ) -> d_school_holidays
-  d_college_holidays <- copy(d_school_holidays)
-
-  # TODO: differentiate between primary, secondary and tertiary school cnt_reduction
+  data.table(category = "schools_closed",
+             date     = seq(as.Date(date_start),as.Date(date_end),1),
+             value    = cnt_reduction_school_secondary,
+             type = 'double',
+             age = NA_integer_,
+             stringsAsFactors = F
+  ) -> d_school_holidays_secondary
+  data.table(category = "schools_closed",
+             date     = seq(as.Date(date_start),as.Date(date_end),1),
+             value    = cnt_reduction_school_tertiary,
+             type = 'double',
+             age = NA_integer_,
+             stringsAsFactors = F
+  ) -> d_college_holidays
 
   ####################################### #
   ## School holidays                 ####
@@ -741,6 +758,20 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
                                   seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1),
                                   seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
                       value    := 1.0]
+    d_school_holidays_secondary[date %in% c(seq(as.Date('2020-01-01'),as.Date('2020-01-05'),1), # 2020
+                                            seq(as.Date('2020-02-24'),as.Date('2020-02-29'),1),
+                                            seq(as.Date('2020-04-06'),as.Date('2020-04-19'),1),
+                                            seq(as.Date('2020-07-01'),as.Date('2020-08-31'),1),
+                                            seq(as.Date('2020-11-02'),as.Date('2020-11-08'),1),
+                                            seq(as.Date('2020-12-21'),as.Date('2020-12-31'),1),
+
+                                            seq(as.Date('2021-01-01'),as.Date('2021-01-03'),1), # 2021
+                                            seq(as.Date('2021-02-15'),as.Date('2021-02-21'),1),
+                                            seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
+                                            seq(as.Date('2021-07-01'),as.Date('2021-08-31'),1),
+                                            seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1),
+                                            seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                                value    := 1.0]
 
     # add college holidays
     d_college_holidays[date %in% c(seq(as.Date('2020-01-01'),as.Date('2020-01-05'),1), # 2020
@@ -762,7 +793,12 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
   # K12 school
   tmp_school_holidays <- copy(d_school_holidays)
   tmp_school_holidays[,category:='schools_closed']
-  for (i_age in 0:17) {
+  for (i_age in 0:11) {
+    d_calendar_holiday <- rbind(d_calendar_holiday,copy(tmp_school_holidays[,age:=i_age]))
+  }
+  tmp_school_holidays <- copy(d_school_holidays_secondary)
+  tmp_school_holidays[,category:='schools_closed']
+  for (i_age in 12:17) {
     d_calendar_holiday <- rbind(d_calendar_holiday,copy(tmp_school_holidays[,age:=i_age]))
   }
 

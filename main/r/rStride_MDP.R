@@ -29,28 +29,28 @@ rm(list=ls())
 
 # Load rStride
 source('./bin/rstride/rStride.R')
-
 source('./bin/rStride_intervention_baseline.R')
+
+
 args = commandArgs(trailingOnly=TRUE)
-# dir = "/Users/alexandracimpean/Desktop/test/"
-# csv_fn = args[2]
 exp_id = "test1"
 
 exp_param_list <- get_exp_param_default(bool_child_param = TRUE, bool_min_restrictive = TRUE, bool_revised_model_param=TRUE)
 
-
 exp_param_list$start_date <- c('2021-01-01')
 exp_param_list$num_days <- 60
-# exp_param_list$num_seeds<- 5
-exp_param_list$num_threads <- 8
+exp_param_list$num_threads <- 1
+exp_param_list$rng_seed <- 0
 
-exp_param_list$output_prefix <- "config/test_calendar"
+exp_param_list$output_prefix <- "config/test_calendar2/school_default_immunity"
 dir <- exp_param_list$output_prefix
-
 smd_print("MDP start date", exp_param_list$start_date)
 
-# check period
-# range(as.Date(exp_param_list$start_date), as.Date(exp_param_list$start_date)+ exp_param_list$num_days)
+# immunity
+# exp_param_list$immunity_link_probability = 0
+# exp_param_list$immunity_profile = "AgeDependent"
+# exp_param_list$immunity_distribution_file = "../FullPop/immunity_covid_belgium.xml"
+
 
 # contact tracing
 exp_param_list$detection_probability         = .7
@@ -81,20 +81,24 @@ config_default <- create_default_config(config_default_filename, run_tag)
 
 config_exp <- create_config_exp(config_default, exp_dir, exp_design, exp_row)
 
-config_exp$cnt_reduction_school <- 0.5
+config_exp$cnt_reduction_school <- 0
+config_exp$cnt_reduction_school_secondary <- 0.5
+config_exp$cnt_reduction_school_tertiary <- 1.0
+
+
 # config_exp$cnt_reduction_workplace     <- 0.0
 # config_exp$cnt_reduction_other         <- 0.0
 # config_exp$cnt_baseline_collectivity   <- 0.0
 
-file_name <- smd_file_path(config_exp$output_prefix,'new_calendar.csv')
+file_name <- smd_file_path(config_exp$output_prefix,'calendar.csv')
 end_date <- "2021-12-31"
-school_holidays <- F
+school_holidays <- T
 # smd_print("end date:", end_date)
 # smd_print("school holidays:", school_holidays)
 create_new_cnt_calendar_file(file_name, config_exp, end_date, school_holidays)  # TODO: added
 
 file_name <- paste0("../", file_name)
 config_exp$holidays_file <- file_name
-config_exp$output_prefix <- "runs/2021/test_calendar_cnt_reduction_school0,5_holidays"
+config_exp$output_prefix <- "runs/28-07-2021/school_default_immunity/"
 
 save_config_xml(config_exp,xml_fn)
