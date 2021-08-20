@@ -89,6 +89,9 @@ public:
         /// Get the size of the age groups
         std::map<AgeGroup, unsigned int> GetAgeGroupSizes();
 
+        /// Get the number of vaccinated individuals per age group
+        std::map<AgeGroup, unsigned int> GetVaccinatedAgeGroups() { return m_vaccinated_age_groups; }
+
         /// Get the cumulative number of cases.
         unsigned int GetTotalInfected() const;
 
@@ -131,6 +134,7 @@ private:
         std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
         util::RnMan m_rnMan;                                        ///< The random number manager
         std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups
+        std::map<AgeGroup, unsigned int> m_vaccinated_age_groups;   ///< The number of vaccinated individuals per age group.
         std::shared_ptr<VaccineProperties> m_mRNA_properties;       ///< The vaccine properties of the mRNA vaccine
         std::shared_ptr<VaccineProperties> m_adeno_properties;      ///< The vaccine properties of the adeno vaccine
 };

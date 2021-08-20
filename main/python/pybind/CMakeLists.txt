@@ -34,6 +34,7 @@ set(PYBIND_SRC
     "mdp/MDP.cpp"
     "mdp/AgeGroup.cpp"
     "mdp/Vaccines.cpp"
+#    "mdp/Health.cpp"
     "libstride.cpp"
     )
 

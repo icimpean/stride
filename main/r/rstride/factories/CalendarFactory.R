@@ -59,7 +59,10 @@ create_calendar_file <- function(file_name_tag='2020_2021',show_plots = FALSE,fi
                '2020-07-21','2020-08-15','2020-11-01','2020-11-11','2020-12-25',
                
                '2021-01-01','2021-04-05','2021-05-01','2021-05-13','2021-06-24', # 2021
-               '2021-07-21','2021-08-15','2021-11-01','2021-11-11','2021-12-25')),
+               '2021-07-21','2021-08-15','2021-11-01','2021-11-11','2021-12-25',
+
+               '2022-01-01','2022-04-18','2022-05-01','2022-05-26','2022-06-06', # 2022
+               '2022-07-21','2022-08-15','2022-11-01','2022-11-11','2022-12-25')),
              value    = 1,
              type = 'boolean',
              age = NA_integer_,
@@ -102,7 +105,14 @@ create_calendar_file <- function(file_name_tag='2020_2021',show_plots = FALSE,fi
                                 seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
                                 seq(as.Date('2021-07-01'),as.Date('2021-08-31'),1),
                                 seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1),
-                                seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                                seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1),
+
+                                seq(as.Date('2022-01-01'),as.Date('2022-01-09'),1), # 2022
+                                seq(as.Date('2022-02-28'),as.Date('2022-03-06'),1),
+                                seq(as.Date('2022-04-04'),as.Date('2022-04-18'),1),
+                                seq(as.Date('2022-07-01'),as.Date('2022-08-31'),1),
+                                seq(as.Date('2022-10-31'),as.Date('2022-11-06'),1),
+                                seq(as.Date('2022-12-26'),as.Date('2022-12-31'),1)),
              value    := 1.0]
   
   # add college holidays
@@ -125,7 +135,14 @@ create_calendar_file <- function(file_name_tag='2020_2021',show_plots = FALSE,fi
                           seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
                           seq(as.Date('2021-07-01'),as.Date('2021-09-19'),1), # summer break untill September, 19
                           #seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1), # no fall break
-                          seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                          seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1),
+
+                          seq(as.Date('2022-01-01'),as.Date('2022-01-09'),1), # 2022
+                          seq(as.Date('2022-02-28'),as.Date('2022-03-06'),1),
+                          seq(as.Date('2022-04-04'),as.Date('2022-04-18'),1),
+                          seq(as.Date('2022-07-01'),as.Date('2022-09-25'),1), ####
+                          # seq(as.Date('2022-10-31'),as.Date('2022-11-06'),1), # no fall break
+                          seq(as.Date('2022-12-26'),as.Date('2022-12-31'),1)),
              value    := 1.0]
   
   #K12 school
@@ -756,7 +773,14 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
                                   seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
                                   seq(as.Date('2021-07-01'),as.Date('2021-08-31'),1),
                                   seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1),
-                                  seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                                  seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1),
+
+                                  seq(as.Date('2022-01-01'),as.Date('2022-01-09'),1), # 2022
+                                  seq(as.Date('2022-02-28'),as.Date('2022-03-06'),1),
+                                  seq(as.Date('2022-04-04'),as.Date('2022-04-18'),1),
+                                  seq(as.Date('2022-07-01'),as.Date('2022-08-31'),1),
+                                  seq(as.Date('2022-10-31'),as.Date('2022-11-06'),1),
+                                  seq(as.Date('2022-12-26'),as.Date('2022-12-31'),1)),
                       value    := 1.0]
     d_school_holidays_secondary[date %in% c(seq(as.Date('2020-01-01'),as.Date('2020-01-05'),1), # 2020
                                             seq(as.Date('2020-02-24'),as.Date('2020-02-29'),1),
@@ -770,7 +794,14 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
                                             seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
                                             seq(as.Date('2021-07-01'),as.Date('2021-08-31'),1),
                                             seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1),
-                                            seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                                            seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1),
+
+                                            seq(as.Date('2022-01-01'),as.Date('2022-01-09'),1), # 2022
+                                            seq(as.Date('2022-02-28'),as.Date('2022-03-06'),1),
+                                            seq(as.Date('2022-04-04'),as.Date('2022-04-18'),1),
+                                            seq(as.Date('2022-07-01'),as.Date('2022-08-31'),1),
+                                            seq(as.Date('2022-10-31'),as.Date('2022-11-06'),1),
+                                            seq(as.Date('2022-12-26'),as.Date('2022-12-31'),1)),
                                 value    := 1.0]
 
     # add college holidays
@@ -786,7 +817,14 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
                                    seq(as.Date('2021-04-05'),as.Date('2021-04-18'),1),
                                    seq(as.Date('2021-07-01'),as.Date('2021-09-19'),1), # summer break untill September, 19
                                    #seq(as.Date('2021-11-01'),as.Date('2021-11-07'),1), # no fall break
-                                   seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1)),
+                                   seq(as.Date('2021-12-27'),as.Date('2021-12-31'),1),
+
+                                   seq(as.Date('2022-01-01'),as.Date('2022-01-09'),1), # 2022
+                                   seq(as.Date('2022-02-28'),as.Date('2022-03-06'),1),
+                                   seq(as.Date('2022-04-04'),as.Date('2022-04-18'),1),
+                                   seq(as.Date('2022-07-01'),as.Date('2022-09-25'),1), ####
+                                   # seq(as.Date('2022-10-31'),as.Date('2022-11-06'),1), # no fall break
+                                   seq(as.Date('2022-12-26'),as.Date('2022-12-31'),1)),
                        value    := 1.0]
   }
 
@@ -925,9 +963,8 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
   ## EXPLORE DATA                        ####
   ########################################### #
 
-  # plot_calendar(dt_calendar            = d_calendar_all,
-  #               filename_calendar_full = filename_calendar_full,
-  #               show_plots             = show_plots)
+  plot_calendar_new(dt_calendar            = d_calendar_all,
+                    filename_calendar_full = file_name)
 
   ########################################### #
   ## SAVE AS CSV	 	                 ####
@@ -944,6 +981,104 @@ create_new_cnt_calendar_file <- function(file_name, config_exp, end_date="2021-1
   unique(d_calendar_all$category)
 
   return(file_name)
+}
+
+
+plot_calendar_new <- function(dt_calendar, filename_calendar_full){
+  smd_print("Plotting calendar...")
+
+
+  # open pdf stream
+  pdf(file=gsub('.csv','.pdf',filename_calendar_full),6,6)
+
+  category_opt <- unique(dt_calendar$category)
+  par(mfrow=c(3,2))
+
+  # check if dt_calendar is data.table
+  if(!is.data.table(dt_calendar)){
+    dt_calendar <- data.table(dt_calendar)
+  }
+
+  # make sure that "date" is in date format
+  dt_calendar$date <- as.Date(dt_calendar$date)
+
+  # x_lim      <- range(dt_calendar$date)
+  x_lim      <- as.Date(c('2021-01-01','2021-12-31'))  # TODO: abstract
+  x_lab_year <- paste(unique(year(dt_calendar$date)),sep='-')
+  i_cat <- category_opt[2]
+  smd_print("cat opt. ", category_opt)
+
+  for(i_cat in category_opt){
+    smd_print("cat option ", i_cat)
+    plot(x   = dt_calendar[category == i_cat,date],
+         y   = dt_calendar[category == i_cat,value],
+         xlim = x_lim,
+         ylim = range(0,1,dt_calendar$value[dt_calendar$category == i_cat]),
+         col  = 1,
+         #type='l',
+         pch  = 15,
+         #lwd=2,
+         main = i_cat,
+         bty='n',
+         xlab = x_lab_year,
+         ylab = unique(dt_calendar[,type]),
+         xaxt = 'n'
+    )
+    add_x_axis(x_lim)
+    abline(h=1,lty=3,col='grey')
+  }
+
+  if("schools_closed" %in% dt_calendar$category){
+
+    i_cat <- "schools_closed"
+
+    # convert value into numeric factors (to use as color)
+    value_levels            <- c(unique(dt_calendar[category == i_cat & value > 0,'value']))
+    dt_calendar$value_level <- factor(dt_calendar$value,levels=unlist(value_levels))
+    dt_calendar$value_col   <- as.numeric(dt_calendar$value_level)
+
+    plot(x   = dt_calendar[category == i_cat,date],
+         y   = dt_calendar[category == i_cat,value],
+         xlim = x_lim,
+         ylim = range(0,1,dt_calendar$value[dt_calendar$category == i_cat]),
+         col  = dt_calendar[category == i_cat,value_col],
+         #type='l',
+         pch  = 15,
+         #lwd=2,
+         main = i_cat,
+         bty='n',
+         xlab = x_lab_year,
+         ylab = unique(dt_calendar[,type]),
+         xaxt = 'n'
+    )
+    add_x_axis(x_lim)
+    abline(h=1,lty=3,col='grey')
+
+
+
+    # plot by age
+    plot(x   = dt_calendar[category == i_cat & value == 1,date],
+         y   = dt_calendar[category == i_cat & value == 1,age],
+         xlim = x_lim,
+         ylim = range(0,1,dt_calendar$age,na.rm=T),
+         col  = 1,
+         pch  = 15,
+         main = i_cat,
+         bty='n',
+         xlab = x_lab_year,
+         ylab = 'age',
+         xaxt = 'n'
+    )
+    points(x    = dt_calendar[category == i_cat ,date],
+           y    = dt_calendar[category == i_cat ,age],
+           col  = dt_calendar[category == i_cat ,value_col],
+           pch  = 15
+    )
+    add_x_axis(x_lim)
+  }
+
+  # close pdf stream
+  dev.off()
 }
 
 if(0==1){ # debug----

@@ -32,6 +32,8 @@ void init_mdp(py::module &m) {
                  "Get the population size")
             .def("GetAgeGroupSizes", &stride::MDP::GetAgeGroupSizes,
                  "Get the sizes of the different age groups")
+            .def("GetVaccinatedAgeGroups", &stride::MDP::GetVaccinatedAgeGroups,
+                 "Get the number of vaccinated individuals per age group")
             .def("GetTotalInfected", &stride::MDP::GetTotalInfected,
                  "Get the cumulative number of cases")
             .def("CountInfectedCases", &stride::MDP::CountInfectedCases,

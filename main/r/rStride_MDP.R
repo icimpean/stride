@@ -38,18 +38,18 @@ exp_id = "test1"
 exp_param_list <- get_exp_param_default(bool_child_param = TRUE, bool_min_restrictive = TRUE, bool_revised_model_param=TRUE)
 
 exp_param_list$start_date <- c('2021-01-01')
-exp_param_list$num_days <- 60
-exp_param_list$num_threads <- 1
+exp_param_list$num_days <- 181 #365  ##60
+exp_param_list$num_threads <- 16
 exp_param_list$rng_seed <- 0
 
-exp_param_list$output_prefix <- "config/test_calendar2/school_default_immunity"
+exp_param_list$output_prefix <- "config/vsc_1/"
 dir <- exp_param_list$output_prefix
 smd_print("MDP start date", exp_param_list$start_date)
 
 # immunity
-# exp_param_list$immunity_link_probability = 0
-# exp_param_list$immunity_profile = "AgeDependent"
-# exp_param_list$immunity_distribution_file = "../FullPop/immunity_covid_belgium.xml"
+exp_param_list$immunity_link_probability = 0
+exp_param_list$immunity_profile = "AgeDependent"
+exp_param_list$immunity_distribution_file = "../FullPop/immunity_covid_belgium.xml"
 
 
 # contact tracing
@@ -62,6 +62,19 @@ exp_param_list$case_finding_capacity         = 10000
 
 exp_param_list$delay_contact_tracing         = 2
 exp_param_list$test_false_negative           = .1
+
+# TODO:
+# exp_param_list$detection_probability         = .0
+#
+# exp_param_list$tracing_efficiency_household  = .0
+# exp_param_list$tracing_efficiency_other      = .0
+#
+# exp_param_list$case_finding_capacity         = 0
+#
+# exp_param_list$delay_contact_tracing         = 0
+# exp_param_list$test_false_negative           = .0
+
+
 
 run_tag <- exp_id
 # generate grid
@@ -85,20 +98,22 @@ config_exp$cnt_reduction_school <- 0
 config_exp$cnt_reduction_school_secondary <- 0.5
 config_exp$cnt_reduction_school_tertiary <- 1.0
 
+config_exp$cnt_reduction_workplace <- 0.7  # 0.5
+config_exp$cnt_reduction_other <- 0.7
 
 # config_exp$cnt_reduction_workplace     <- 0.0
 # config_exp$cnt_reduction_other         <- 0.0
 # config_exp$cnt_baseline_collectivity   <- 0.0
 
 file_name <- smd_file_path(config_exp$output_prefix,'calendar.csv')
-end_date <- "2021-12-31"
-school_holidays <- T
+end_date <- "2022-12-31"
+school_holidays <- T  # TODO
 # smd_print("end date:", end_date)
 # smd_print("school holidays:", school_holidays)
 create_new_cnt_calendar_file(file_name, config_exp, end_date, school_holidays)  # TODO: added
 
 file_name <- paste0("../", file_name)
 config_exp$holidays_file <- file_name
-config_exp$output_prefix <- "runs/28-07-2021/school_default_immunity/"
+config_exp$output_prefix <- "runs/vcs_1/"
 
 save_config_xml(config_exp,xml_fn)

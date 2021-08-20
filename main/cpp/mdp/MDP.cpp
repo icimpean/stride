@@ -186,6 +186,8 @@ void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineTy
         Person& p = pop->at(id);
         auto vaccine = vaccineProperties->GetVaccine();
         p.SetVaccine(vaccine);
+        // Another person vaccinated from the age group
+        m_vaccinated_age_groups[ageGroup] += 1;
     }
     // Log info
     m_stride_logger->info("[Vaccinate] {}/{} people vaccinated from age group {} with vaccine {}",
@@ -257,6 +259,7 @@ void MDP::CreateAgeGroups()
     m_stride_logger->info("Creating age groups...");
     // Create an empty mapping for each age group
     for (AgeGroup ageGroup : AllAgeGroups) { m_age_groups[ageGroup] = std::vector<unsigned int>(); }
+    for (AgeGroup ageGroup : AllAgeGroups) { m_vaccinated_age_groups[ageGroup] = 0; }
     // Iterate over the population and add people to their age group
     std::shared_ptr<Population> pop = m_simulator->GetPopulation();
     for (Person& p : *pop) { m_age_groups[GetAgeGroup(p.GetAge())].push_back(p.GetId()); }
@@ -270,12 +273,11 @@ void MDP::CreateAgeGroups()
 std::vector<unsigned int> MDP::SampleAgeGroup(AgeGroup ageGroup, unsigned int samples)
 {
     // Get the age group to sample from
-    std::vector<unsigned int> group = m_age_groups[ageGroup];
     std::vector<unsigned int> sampled;
     // Take the last elements of the shuffled age group and remove them from the vector
-    while (!group.empty() && sampled.size() < samples) {
-        sampled.push_back(group.back());
-        group.pop_back();
+    while (!m_age_groups[ageGroup].empty() && sampled.size() < samples) {
+        sampled.push_back(m_age_groups[ageGroup].back());
+        m_age_groups[ageGroup].pop_back();
     }
     return sampled;
 }
