@@ -48,6 +48,8 @@ void init_mdp(py::module &m) {
                  "Get the current number of hospitalised cases")
             .def("GetTotalHospitalised", &stride::MDP::GetTotalHospitalised,
                  "Get the cumulative number of hospitalisations")
+            .def("GetAtRisk", &stride::MDP::GetAtRisk,
+                 "Get the number of people at risk in the population")
             .def("SimulateDay", &stride::MDP::SimulateDay,
                  "Runs the simulator for a day")
             .def("Simulate", &stride::MDP::Simulate, py::arg("numDays"),

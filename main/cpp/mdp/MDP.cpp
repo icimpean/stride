@@ -254,6 +254,11 @@ unsigned int MDP::GetTotalHospitalised() const
     return m_simulator->GetPopulation()->GetTotalHospitalised();
 }
 
+unsigned int MDP::GetAtRisk() const
+{
+    return m_simulator->GetPopulation()->GetAtRisk();
+}
+
 void MDP::CreateAgeGroups()
 {
     m_stride_logger->info("Creating age groups...");

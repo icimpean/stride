@@ -79,6 +79,9 @@ public:
         /// Get the cumulative number of hospitalisations.
         unsigned int GetTotalHospitalised() const;
 
+        /// Get the number of people at risk in the population
+        unsigned int GetAtRisk() const;
+
         /// Get the maximum age in the population.
         unsigned int GetMaxAge() const;
 

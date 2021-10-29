@@ -167,6 +167,16 @@ unsigned int Population::GetTotalHospitalised() const
         return total;
 }
 
+unsigned int Population::GetAtRisk() const
+{
+        unsigned int total{0U};
+        for (const auto& p : *this) {
+            const auto& h = p.GetHealth();
+            total += !p.IsImmune();
+        }
+        return total;
+}
+
 unsigned int Population::GetMaxAge() const
 {
         unsigned int maxAge{0U};
