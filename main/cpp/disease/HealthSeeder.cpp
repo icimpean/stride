@@ -87,7 +87,7 @@ void HealthSeeder::Seed(const std::shared_ptr<stride::Population>& pop, const Ho
 {
         auto& population = *pop;
 
-        vector<double> hospitalisationVariance = {-1.0, 0.0, 1.0};
+        vector<double> hospitalisationVariance = {1.0/3, 2.0/3, 3.0/3};  // 0, 1, 2
 
 #pragma omp parallel num_threads(handlers.size())
         {
@@ -116,7 +116,7 @@ void HealthSeeder::Seed(const std::shared_ptr<stride::Population>& pop, const Ho
                         } else {
                             const bool isHospitalised = gen01() <= hc.GetProbability(population[i].GetAge());
                             if (isHospitalised) {
-                                double variance = Sample(hospitalisationVariance, gen01());
+                                double variance = Sample(hospitalisationVariance, gen01()) - 1; // -1, 0 or 1
                                 daysToHospitalisation = startSymptomatic + hc.GetDelay(population[i].GetAge()) + variance;
                             } 
                         }
