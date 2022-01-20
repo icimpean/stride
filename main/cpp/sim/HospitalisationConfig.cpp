@@ -27,32 +27,34 @@ void HospitalisationConfig::NoHospitalisationInit()
     for (unsigned int i=0; i <= MaximumAge(); ++i) {
         m_probabilities[i] = 0.0;
         m_delays[i] = 0.0;
-    }   
+    }
 }
 
-HospitalisationConfig::HospitalisationConfig() : m_probabilities(), m_delays() 
+HospitalisationConfig::HospitalisationConfig() : m_probabilities(), m_delays()
 {
     NoHospitalisationInit();
 }
 
 HospitalisationConfig::HospitalisationConfig(
-    std::vector<unsigned int> ageCategories,
-    std::vector<double> probabilities, std::vector<double> delays)
-    : m_probabilities(), m_delays()
+        std::vector<unsigned int> ageCategories,
+        std::vector<double> probabilities, std::vector<double> delays, double probability_factor)
+        : m_probabilities(), m_delays()
 {
     //default initialisation
     NoHospitalisationInit();
-    
+
     //parse the age category probabilities/delays
     if (!ageCategories.empty()) {
         for (unsigned int i=0; i <= ageCategories.size() - 1; ++i) {
             unsigned int max = MaximumAge();
             if (i < ageCategories.size() - 1)
-		        max = ageCategories[i+1] - 1;
+                max = ageCategories[i+1] - 1;
             for (unsigned int j=ageCategories[i]; j <= max; ++j) {
-                m_probabilities[j] = probabilities[i];
+                double new_prob = probabilities[i] * probability_factor;
+                if (new_prob > 1) { new_prob = 1; }
+                m_probabilities[j] = new_prob;
                 m_delays[j] = delays[i];
-            } 
+            }
         }
     }
 }

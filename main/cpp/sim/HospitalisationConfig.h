@@ -38,7 +38,7 @@ public:
 
         /// Constructor accepting age categories, and for each category the probability and delay to hospitalisation.
         HospitalisationConfig(std::vector<unsigned int> ageCategories, 
-                std::vector<double> probabilities, std::vector<double> delays);
+                std::vector<double> probabilities, std::vector<double> delays, double probability_factor);
 
         /// Get the hospitalisation probability for an age.
         double GetProbability(const int age) const { return m_probabilities[EffectiveAge(age)]; }
