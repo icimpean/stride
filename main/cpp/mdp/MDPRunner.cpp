@@ -55,7 +55,9 @@ void MDPRunner::Step()
 
 void MDPRunner::End()
 {
+    m_clock.Stop();
     Notify(Id::Finished);
+    m_clock.Reset();
 }
 
 } // namespace stride

@@ -18,6 +18,8 @@
  * Header for the MDP class.
  */
 
+#pragma once
+
 #include "contact/AgeContactProfiles.h"
 #include "contact/EventLogMode.h"
 #include "contact/InfectorExec.h"
