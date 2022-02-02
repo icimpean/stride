@@ -110,7 +110,7 @@ public:
         		bool isHouseholdClusteringAllowed,
         		bool isIsolatedFromHousehold, 
 				util::RnHandler& rnHandler,
-                const std::shared_ptr<Calendar> calendar);
+                unsigned short int simDay);
 
         /// Set the age of the person
         void SetAge(unsigned int newAge) { m_age = newAge; }
