@@ -46,7 +46,7 @@ MDP::MDP()
 
 MDP::~MDP() {
     cout << "Deleting MDP attributes..." << endl;
-    ClearSimulation();
+    if (!m_simulator->GetPopulation()->empty()) { ClearSimulation(); }
 }
 
 void MDP::Create(const std::string& configPath,
@@ -364,6 +364,7 @@ void MDP::ClearSimulation()
     m_simulator->GetPopulation()->clear();
 
     cout << "\tClearing simulator and runner..." << endl;
+    m_runner->End();
     m_runner.reset();
     m_simulator.reset();
 
