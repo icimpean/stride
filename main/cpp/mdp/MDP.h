@@ -58,7 +58,8 @@ public:
         void Create(const std::string& configPath,
                     std::shared_ptr<VaccineProperties> mRNA_properties,
                     std::shared_ptr<VaccineProperties> adeno_properties,
-                    int seed = 0, const std::string& outputDir = "", const std::string& outputPrefix = "");
+                    int seed = 0, const std::string& outputDir = "", const std::string& outputPrefix = "",
+                    bool childless = false);
 
         /// Update the contact reduction vectors
         void UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
@@ -76,6 +77,7 @@ public:
 
         /// Vaccinate a given age group with the given vaccine type and number of available vaccines
         void Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineType vaccineType);
+        void VaccinateChildless(unsigned int availableVaccines, ChildlessAgeGroup ageGroup, VaccineType vaccineType);
 
         /// Notify the simulator should stop
         void End();
@@ -88,9 +90,11 @@ public:
 
         /// Get the size of the age groups
         std::map<AgeGroup, unsigned int> GetAgeGroupSizes();
+        std::map<ChildlessAgeGroup, unsigned int> GetChildlessAgeGroupSizes();
 
         /// Get the number of vaccinated individuals per age group
         std::map<AgeGroup, unsigned int> GetVaccinatedAgeGroups() { return m_vaccinated_age_groups; }
+        std::map<ChildlessAgeGroup, unsigned int> GetVaccinatedChildlessAgeGroups() { return m_vaccinated_childless_age_groups; }
 
         /// Get the cumulative number of cases.
         unsigned int GetTotalInfected() const;
@@ -125,19 +129,23 @@ public:
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration
         void Create_(const boost::property_tree::ptree& config, int seed,
-                     const std::string& outputDir, const std::string& outputPrefix);
+                     const std::string& outputDir, const std::string& outputPrefix, bool childless);
         /// Create a mapping of the age groups with the person IDs of people corresponding to those age groups.
         void CreateAgeGroups();
+        void CreateChildlessAgeGroups();
         /// Sample IDs for a given age group
         std::vector<unsigned int> SampleAgeGroup(AgeGroup ageGroup, unsigned int samples);
+        std::vector<unsigned int> SampleAgeGroup(ChildlessAgeGroup ageGroup, unsigned int samples);
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree
         std::shared_ptr<Sim> m_simulator;                           ///< The simulation
         std::shared_ptr<MDPRunner> m_runner;                        ///< The runner for the simulation
         util::RnMan m_rnMan;                                        ///< The random number manager
-        std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups
+        std::map<AgeGroup, std::vector<unsigned int>> m_age_groups; ///< The IDs of people belonging to different age groups.
+        std::map<ChildlessAgeGroup, std::vector<unsigned int>> m_childless_age_groups;
         std::map<AgeGroup, unsigned int> m_vaccinated_age_groups;   ///< The number of vaccinated individuals per age group.
+        std::map<ChildlessAgeGroup, unsigned int> m_vaccinated_childless_age_groups;
         std::shared_ptr<VaccineProperties> m_mRNA_properties;       ///< The vaccine properties of the mRNA vaccine
         std::shared_ptr<VaccineProperties> m_adeno_properties;      ///< The vaccine properties of the adeno vaccine
 };

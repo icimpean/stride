@@ -58,4 +58,31 @@ inline AgeGroup GetAgeGroup(unsigned int age) {
         else { return elderly; }
 }
 
+enum ChildlessAgeGroup {
+    /// Children
+    children_c = -1,
+    /// Age 18-25
+    young_adults_c,
+    /// Age 26-64
+    adults_c,
+    /// Age 65+
+    elderly_c
+};
+
+/// All the age groups
+static const std::vector<ChildlessAgeGroup> AllChildlessAgeGroups = { young_adults_c, adults_c, elderly_c };
+
+
+/// Get the age group for a given age
+inline ChildlessAgeGroup GetChildlessAgeGroup(unsigned int age) {
+    /// Age 0-17 children
+    if (age < 18) { return children_c; }
+    /// Age 19-25
+    else if (age < 26) { return young_adults_c; }
+    /// Age 26-64
+    else if (age < 65) { return adults_c; }
+    /// Age 65+
+    else { return elderly_c; }
+}
+
 } // namespace stride

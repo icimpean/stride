@@ -20,4 +20,14 @@ void init_age_group(py::module &m) {
     m.attr("AllAgeGroups") = stride::AllAgeGroups;
     // Get AgeGroup given an age
     m.def("GetAgeGroup", &stride::GetAgeGroup, py::arg("age"), "Get the age group for the given age");
+
+    // ChildlessAgeGroup enumeration
+    py::enum_<stride::ChildlessAgeGroup>(m, "ChildlessAgeGroup")
+            .value("young_adults", stride::ChildlessAgeGroup::young_adults_c)
+            .value("adults", stride::ChildlessAgeGroup::adults_c)
+            .value("elderly", stride::ChildlessAgeGroup::elderly_c);
+    // All age groups
+    m.attr("AllChildlessAgeGroups") = stride::AllChildlessAgeGroups;
+    // Get AgeGroup given an age
+    m.def("GetChildlessAgeGroup", &stride::GetChildlessAgeGroup, py::arg("age"), "Get the age group for the given age");
 }

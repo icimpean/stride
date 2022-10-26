@@ -39,7 +39,7 @@ using namespace EventLogMode;
 using namespace stride::ContactType;
 
 MDP::MDP()
-    : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), m_age_groups(),
+    : m_config(), m_simulator(nullptr), m_runner(nullptr), m_rnMan(), m_age_groups(), m_childless_age_groups(),
       m_mRNA_properties(nullptr), m_adeno_properties(nullptr)
 {
 }
@@ -51,16 +51,16 @@ MDP::~MDP() {
 
 void MDP::Create(const std::string& configPath,
                  std::shared_ptr<VaccineProperties> mRNA_properties, std::shared_ptr<VaccineProperties> adeno_properties,
-                 int seed, const std::string& outputDir, const std::string& outputPrefix)
+                 int seed, const std::string& outputDir, const std::string& outputPrefix, bool childless)
 {
     boost::property_tree::ptree configPt = FileSys::ReadPtreeFile(configPath);
-    MDP::Create_(configPt, seed, outputDir, outputPrefix);
+    MDP::Create_(configPt, seed, outputDir, outputPrefix, childless);
     m_mRNA_properties = mRNA_properties;
     m_adeno_properties = adeno_properties;
 }
 
 void MDP::Create_(const boost::property_tree::ptree& config, int seed,
-                  const std::string& outputDir, const std::string& outputPrefix)
+                  const std::string& outputDir, const std::string& outputPrefix, bool childless)
 {
     // Update the config
     m_config = config;
@@ -129,7 +129,7 @@ void MDP::Create_(const boost::property_tree::ptree& config, int seed,
     // Vaccines: Create the age groups for vaccine sampling later
     // -----------------------------------------------------------------------------------------
     m_rnMan = rnMan;
-    CreateAgeGroups();
+    if (!childless) { CreateAgeGroups(); } else { CreateChildlessAgeGroups(); }
 }
 
 void MDP::UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
@@ -194,6 +194,32 @@ void MDP::Vaccinate(unsigned int availableVaccines, AgeGroup ageGroup, VaccineTy
                           sampled.size(), availableVaccines, ageGroup, vaccineType);
 }
 
+void MDP::VaccinateChildless(unsigned int availableVaccines, ChildlessAgeGroup ageGroup, VaccineType vaccineType)
+{
+    // Get people availableVaccines people within the given age group
+    std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+    // Sample from the given age group (none of these are vaccinated yet)
+    std::vector<unsigned int> sampled = SampleAgeGroup(ageGroup, availableVaccines);
+    // Get the vaccine properties for the given vaccine type
+    std::shared_ptr<VaccineProperties> vaccineProperties;
+    // mRNA
+    if (vaccineType == mRNA) { vaccineProperties = m_mRNA_properties; }
+        // Adeno
+    else if (vaccineType == adeno) { vaccineProperties = m_adeno_properties; }
+
+    // Vaccinate the sampled people
+    for (unsigned int id : sampled) {
+        Person& p = pop->at(id);
+        auto vaccine = vaccineProperties->GetVaccine();
+        p.SetVaccine(vaccine);
+        // Another person vaccinated from the age group
+        m_vaccinated_childless_age_groups[ageGroup] += 1;
+    }
+    // Log info
+    m_stride_logger->info("[VaccinateChildless] {}/{} people vaccinated from age group {} with vaccine {}",
+                          sampled.size(), availableVaccines, ageGroup, vaccineType);
+}
+
 void MDP::End()
 {
     m_runner->End();
@@ -216,6 +242,15 @@ std::map<AgeGroup, unsigned int> MDP::GetAgeGroupSizes()
     //      => these values may change over time as people get vaccinated
     std::map<AgeGroup, unsigned int> groupCounts;
     for (AgeGroup ageGroup : AllAgeGroups) { groupCounts[ageGroup] = m_age_groups[ageGroup].size(); }
+    return groupCounts;
+}
+
+std::map<ChildlessAgeGroup, unsigned int> MDP::GetChildlessAgeGroupSizes()
+{
+    // Note: takes the number of people per age group that are not yet vaccinated
+    //      => these values may change over time as people get vaccinated
+    std::map<ChildlessAgeGroup, unsigned int> groupCounts;
+    for (ChildlessAgeGroup ageGroup : AllChildlessAgeGroups) { groupCounts[ageGroup] = m_childless_age_groups[ageGroup].size(); }
     return groupCounts;
 }
 
@@ -275,6 +310,26 @@ void MDP::CreateAgeGroups()
     }
 }
 
+void MDP::CreateChildlessAgeGroups()
+{
+    m_stride_logger->info("Creating childless age groups...");
+    // Create an empty mapping for each age group
+    for (ChildlessAgeGroup ageGroup : AllChildlessAgeGroups) { m_childless_age_groups[ageGroup] = std::vector<unsigned int>(); }
+    for (ChildlessAgeGroup ageGroup : AllChildlessAgeGroups) { m_vaccinated_childless_age_groups[ageGroup] = 0; }
+    // Iterate over the population and add people to their age group
+    std::shared_ptr<Population> pop = m_simulator->GetPopulation();
+    for (Person& p : *pop) {
+        // Only store adults
+        ChildlessAgeGroup ageGroup = GetChildlessAgeGroup(p.GetAge());
+        if (ageGroup != ChildlessAgeGroup::children_c) { m_childless_age_groups[ageGroup].push_back(p.GetId()); }
+    }
+    // Remove unused capacity from the vectors and shuffle the values
+    for (ChildlessAgeGroup ageGroup : AllChildlessAgeGroups) {
+        m_childless_age_groups[ageGroup].shrink_to_fit();
+        m_rnMan.Shuffle(m_childless_age_groups[ageGroup], 0U);
+    }
+}
+
 std::vector<unsigned int> MDP::SampleAgeGroup(AgeGroup ageGroup, unsigned int samples)
 {
     // Get the age group to sample from
@@ -283,6 +338,18 @@ std::vector<unsigned int> MDP::SampleAgeGroup(AgeGroup ageGroup, unsigned int sa
     while (!m_age_groups[ageGroup].empty() && sampled.size() < samples) {
         sampled.push_back(m_age_groups[ageGroup].back());
         m_age_groups[ageGroup].pop_back();
+    }
+    return sampled;
+}
+
+std::vector<unsigned int> MDP::SampleAgeGroup(ChildlessAgeGroup ageGroup, unsigned int samples)
+{
+    // Get the age group to sample from
+    std::vector<unsigned int> sampled;
+    // Take the last elements of the shuffled age group and remove them from the vector
+    while (!m_childless_age_groups[ageGroup].empty() && sampled.size() < samples) {
+        sampled.push_back(m_childless_age_groups[ageGroup].back());
+        m_childless_age_groups[ageGroup].pop_back();
     }
     return sampled;
 }
@@ -302,6 +369,7 @@ void MDP::ClearSimulation()
 
     cout << "\tClearing age groups..." << endl;
     m_age_groups.clear();
+    m_childless_age_groups.clear();
 
     cout << "\tClearing vaccine properties..." << endl;
     m_mRNA_properties.reset();

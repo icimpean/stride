@@ -20,6 +20,7 @@ void init_mdp(py::module &m) {
             .def("Create", &stride::MDP::Create,
                  py::arg("configPath"), py::arg("mRNA_properties"), py::arg("adeno_properties"),
                  py::arg("seed") = 0, py::arg("outputDir") = "", py::arg("outputPrefix") = "",
+                 py::arg("childless") = false,
                  "Create a simulation from the given configuration file (.xml) "
                  "and optional output directory and prefix for the logs")
             .def("UpdateCntReduction", &stride::MDP::UpdateCntReduction,
@@ -32,7 +33,11 @@ void init_mdp(py::module &m) {
                  "Get the population size")
             .def("GetAgeGroupSizes", &stride::MDP::GetAgeGroupSizes,
                  "Get the sizes of the different age groups")
+            .def("GetChildlessAgeGroupSizes", &stride::MDP::GetChildlessAgeGroupSizes,
+                 "Get the sizes of the different age groups")
             .def("GetVaccinatedAgeGroups", &stride::MDP::GetVaccinatedAgeGroups,
+                 "Get the number of vaccinated individuals per age group")
+            .def("GetVaccinatedChildlessAgeGroups", &stride::MDP::GetVaccinatedChildlessAgeGroups,
                  "Get the number of vaccinated individuals per age group")
             .def("GetTotalInfected", &stride::MDP::GetTotalInfected,
                  "Get the cumulative number of cases")
@@ -58,6 +63,9 @@ void init_mdp(py::module &m) {
                  py::arg("numDays"), py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
                  "Runs the simulator for the given number of days and vaccinates people with the given vaccine type")
             .def("Vaccinate", &stride::MDP::Vaccinate,
+                 py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
+                 "Vaccinate a given age group with the given vaccine type for the available number of vaccines")
+            .def("VaccinateChildless", &stride::MDP::VaccinateChildless,
                  py::arg("availableVaccines"), py::arg("ageGroup"), py::arg("vaccineType"),
                  "Vaccinate a given age group with the given vaccine type for the available number of vaccines")
             .def("End", &stride::MDP::End,
