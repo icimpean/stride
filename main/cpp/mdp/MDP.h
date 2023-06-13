@@ -35,6 +35,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <tuple>
 
 namespace stride {
@@ -61,7 +62,7 @@ public:
                     std::shared_ptr<VaccineProperties> mRNA_properties,
                     std::shared_ptr<VaccineProperties> adeno_properties,
                     int seed = 0, const std::string& outputDir = "", const std::string& outputPrefix = "",
-                    bool childless = false);
+                    bool childless = false, double uptake = 1);
 
         /// Update the contact reduction vectors
         void UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
@@ -131,13 +132,15 @@ public:
 private:
         /// Create an MDP (and the underlying simulation) from a given configuration
         void Create_(const boost::property_tree::ptree& config, int seed,
-                     const std::string& outputDir, const std::string& outputPrefix, bool childless);
+                     const std::string& outputDir, const std::string& outputPrefix, bool childless, double uptake);
         /// Create a mapping of the age groups with the person IDs of people corresponding to those age groups.
         void CreateAgeGroups();
         void CreateChildlessAgeGroups();
         /// Sample IDs for a given age group
         std::vector<unsigned int> SampleAgeGroup(AgeGroup ageGroup, unsigned int samples);
         std::vector<unsigned int> SampleAgeGroup(ChildlessAgeGroup ageGroup, unsigned int samples);
+        /// Create a mapping of all households to their persons, to initialise age group mappings
+        void CreateHouseholdMapping(double uptake);
 
 private:
         boost::property_tree::ptree m_config;                       ///< Configuration property tree

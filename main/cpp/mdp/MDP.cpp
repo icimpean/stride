@@ -51,16 +51,16 @@ MDP::~MDP() {
 
 void MDP::Create(const std::string& configPath,
                  std::shared_ptr<VaccineProperties> mRNA_properties, std::shared_ptr<VaccineProperties> adeno_properties,
-                 int seed, const std::string& outputDir, const std::string& outputPrefix, bool childless)
+                 int seed, const std::string& outputDir, const std::string& outputPrefix, bool childless, double uptake)
 {
     boost::property_tree::ptree configPt = FileSys::ReadPtreeFile(configPath);
-    MDP::Create_(configPt, seed, outputDir, outputPrefix, childless);
+    MDP::Create_(configPt, seed, outputDir, outputPrefix, childless, uptake);
     m_mRNA_properties = mRNA_properties;
     m_adeno_properties = adeno_properties;
 }
 
 void MDP::Create_(const boost::property_tree::ptree& config, int seed,
-                  const std::string& outputDir, const std::string& outputPrefix, bool childless)
+                  const std::string& outputDir, const std::string& outputPrefix, bool childless, double uptake)
 {
     // Update the config
     m_config = config;
@@ -129,7 +129,9 @@ void MDP::Create_(const boost::property_tree::ptree& config, int seed,
     // Vaccines: Create the age groups for vaccine sampling later
     // -----------------------------------------------------------------------------------------
     m_rnMan = rnMan;
-    if (!childless) { CreateAgeGroups(); } else { CreateChildlessAgeGroups(); }
+    if (uptake != 1) { CreateHouseholdMapping(uptake); }
+    else if (!childless) { CreateAgeGroups(); }
+    else { CreateChildlessAgeGroups(); }
 }
 
 void MDP::UpdateCntReduction(std::vector<double> workplace_distancing, std::vector<double> community_distancing,
@@ -352,6 +354,103 @@ std::vector<unsigned int> MDP::SampleAgeGroup(ChildlessAgeGroup ageGroup, unsign
         m_childless_age_groups[ageGroup].pop_back();
     }
     return sampled;
+}
+
+void MDP::CreateHouseholdMapping(double uptake)
+{
+    m_stride_logger->info("Creating household mapping...");
+    int fullPopSize = 0;
+    std::unordered_map<unsigned int, unsigned int> householdSizes;
+    std::vector<unsigned int> householdIds;
+    // Iterate over contact pools
+    auto& poolSys = m_simulator->GetPopulation()->RefPoolSys();
+    const util::SegmentedVector<ContactPool>& householdPools = poolSys.CRefPools(ContactType::Id::Household);
+
+    // Iterate over contact pools
+    for (const ContactPool& h : householdPools) {
+        const unsigned int hhId = h.GetId();
+        const unsigned int hSize = h.size();
+        householdSizes[hhId] = hSize;
+        householdIds.push_back(hhId);
+        fullPopSize += hSize;
+    }
+    // Remove unused capacity from container
+    householdIds.shrink_to_fit();
+
+    m_stride_logger->info("Sampling household update...");
+    // Determine the approximate amount of persons from the population that need to be sampled
+    unsigned int maxSampleSize = (int)std::round(uptake * fullPopSize);
+    unsigned int numPools = householdIds.size();
+    cout << "\tcontact pools: " << numPools << ", population size: " << fullPopSize << ", uptake: " << uptake <<
+            " ==> requested sample size " << maxSampleSize << endl;
+    std::vector<unsigned int> preSampledHouseholds (householdIds);
+    m_rnMan.Shuffle(preSampledHouseholds, 0U);
+
+    std::vector<unsigned int> samplePools;  // TODO remove once test cleared
+    std::vector<unsigned int> sampleIds;
+    unsigned int sampleSize = 0;
+    unsigned int bestMatch = 0;
+    unsigned int bestSize = 0;
+
+    while (sampleSize < maxSampleSize) {
+        // No more pools left to sample
+        if (preSampledHouseholds.empty()) { break; }
+
+        unsigned int newPoolId = preSampledHouseholds.back();
+        preSampledHouseholds.pop_back();
+        unsigned int poolSize = householdSizes[newPoolId];
+        unsigned int newSize = sampleSize + poolSize;
+
+        // Done
+        if (newSize == maxSampleSize) {
+            sampleSize = newSize;
+            samplePools.push_back(poolSize);
+            sampleIds.push_back(newPoolId);
+        }
+        // If size is larger than allowed, resample but keep best sample
+        else if (newSize > maxSampleSize) {
+            if (bestSize < newSize) { continue; }
+            bestSize = newSize;
+            bestMatch = newPoolId;
+        }
+        // Gather samples
+        else {
+            sampleSize = newSize;
+            samplePools.push_back(poolSize);
+            sampleIds.push_back(newPoolId);
+        }
+    }
+
+    // Should normally not trigger for large populations with many contact pools
+    if (bestSize != 0 and sampleSize != maxSampleSize) {
+        unsigned int diffWithout = abs(int(maxSampleSize - sampleSize));
+        unsigned int diffWith = abs(int(maxSampleSize - bestSize));
+        cout << "\tCouldn't find a perfect match, deciding remaining best household... diffWithout = " <<
+                diffWithout << ", diffWith = " << diffWith << endl;
+        if (diffWith < diffWithout) {
+            cout << "\tChoosing with remaining household" << endl;
+            sampleSize = bestSize;
+            samplePools.push_back(householdSizes[bestMatch]);
+            sampleIds.push_back(bestMatch);
+        }
+    }
+    cout << "\tSampled contact pools: " << sampleIds.size() << ", sampled persons: " << sampleSize << endl;
+
+    // Create age groups, with only the people in the selected contact pools
+    m_stride_logger->info("Creating age groups from households with uptake...");
+    // Create an empty mapping for each age group
+    for (AgeGroup ageGroup : AllAgeGroups) { m_age_groups[ageGroup] = std::vector<unsigned int>(); }
+    for (AgeGroup ageGroup : AllAgeGroups) { m_vaccinated_age_groups[ageGroup] = 0; }
+    // Iterate over the contact pools and add people to their age group
+    for (const unsigned int hhId : sampleIds) {
+        const ContactPool& h = householdPools.at(hhId);
+        for (const Person *p : h.GetPool()) { m_age_groups[GetAgeGroup(p->GetAge())].push_back(p->GetId()); }
+    }
+    // Remove unused capacity from the vectors and shuffle the values
+    for (AgeGroup ageGroup : AllAgeGroups) {
+        m_age_groups[ageGroup].shrink_to_fit();
+        m_rnMan.Shuffle(m_age_groups[ageGroup], 0U);
+    }
 }
 
 void MDP::ClearSimulation()
